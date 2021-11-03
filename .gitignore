@@ -1,0 +1,13 @@
+node_modules/
+.idea/
+.mta/
+*.mtar
+dist/
+package-lock.json
+mta_archives/
+Makefile*
+mta-*
+.vscode/
+resources/
+**/default-services.json
+**/default-env.json

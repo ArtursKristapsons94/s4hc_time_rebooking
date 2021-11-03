@@ -1,0 +1,7 @@
+{
+    "js": {
+        "brace_style": "none",
+        "indent_with_tabs": true,
+        "space_after_anon_function": true
+    }
+}
