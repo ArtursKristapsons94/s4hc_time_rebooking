@@ -1,0 +1,144 @@
+{
+    "ActivitySet": [
+        {
+            "ActivityType": "T001",
+            "RoleName": "Consulting Services"
+        },
+        {
+            "ActivityType": "T002",
+            "RoleName": "Client Support"
+        },
+        {
+            "ActivityType": "T003",
+            "RoleName": "Appl. Mgmt. Services"
+        },
+        {
+            "ActivityType": "T004",
+            "RoleName": "Managment Cons."
+        },
+        {
+            "ActivityType": "T005",
+            "RoleName": "Jun. Cons. Services"
+        },
+        {
+            "ActivityType": "T006",
+            "RoleName": "Sen. Cons. Services"
+        },
+        {
+            "ActivityType": "T007",
+            "RoleName": "Solution Architect"
+        },
+        {
+            "ActivityType": "T008",
+            "RoleName": "Proj. /Progr. Mgmt."
+        },
+        {
+            "ActivityType": "T009",
+            "RoleName": "Partner"
+        },
+        {
+            "ActivityType": "T010",
+            "RoleName": "Techniker"
+        },
+        {
+            "ActivityType": "T011",
+            "RoleName": "Trainee"
+        },
+        {
+            "ActivityType": "T012",
+            "RoleName": "Development"
+        },
+        {
+            "ActivityType": "T013",
+            "RoleName": "Infastr.Services"
+        },
+        {
+            "ActivityType": "T014",
+            "RoleName": "Travel Cons. Serv."
+        },
+        {
+            "ActivityType": "T015",
+            "RoleName": "Travel Client Supp."
+        },
+        {
+            "ActivityType": "T016",
+            "RoleName": "Tra. Appl. Mgmt. Serv"
+        },
+        {
+            "ActivityType": "T017",
+            "RoleName": "Travel Mgmt. Cons."
+        },
+        {
+            "ActivityType": "T018",
+            "RoleName": "Travel Jun. Cons. Serv."
+        },
+        {
+            "ActivityType": "T019",
+            "RoleName": "Travel Sen Cons. Serv"
+        },
+        {
+            "ActivityType": "T020",
+            "RoleName": "Travel Sol. Arhitect"
+        },
+        {
+            "ActivityType": "T021",
+            "RoleName": "Tra. Proj/Prog. Mgmt"
+        },
+        {
+            "ActivityType": "T022",
+            "RoleName": "Travel Partner"
+        },
+        {
+            "ActivityType": "T023",
+            "RoleName": "Travel Techniker"
+        },
+        {
+            "ActivityType": "T024",
+            "RoleName": "Travel Trainee"
+        },
+        {
+            "ActivityType": "T025",
+            "RoleName": "Travel Development"
+        },
+        {
+            "ActivityType": "T026",
+            "RoleName": "Travel Infastr. Serv."
+        },
+        {
+            "ActivityType": "T027",
+            "RoleName": "Training"
+        },
+        {
+            "ActivityType": "T028",
+            "RoleName": "Travel Training"
+        },
+        {
+            "ActivityType": "T029",
+            "RoleName": "Materialestellung"
+        },
+        {
+            "ActivityType": "T030",
+            "RoleName": "Travel Materiast."
+        },
+        {
+            "ActivityType": "T031",
+            "RoleName": "Trainingskonzeption"
+        },
+        {
+            "ActivityType": "T032",
+            "RoleName": "Travel Trainingskonz"
+        },
+        {
+            "ActivityType": "T033",
+            "RoleName": "Train the Trainer"
+        },
+        {
+            "ActivityType": "T034",
+            "RoleName": "Travel Train Trainer"
+        },
+        {
+            "ActivityType": "T035",
+            "RoleName": "Travel"
+        }
+    ]
+}

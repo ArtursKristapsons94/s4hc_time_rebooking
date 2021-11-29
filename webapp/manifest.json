@@ -1,0 +1,187 @@
+{
+	"_version": "1.32.0",
+
+	"sap.app": {
+		"id": "com.timereporting",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"title": "Time Rebooking Application",
+		"description": "{{appDescription}}",
+
+		"applicationVersion": {
+		"version": "1.0.0"
+		},
+		"resources": "resources.json",
+		"dataSources": {
+			"mainService": {
+				"uri": "/sap/opu/odata/CPD/SC_EXTERNAL_SERVICES_SRV/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0",
+					"localUri": "localService/metadata.xml"
+				}
+			},
+			"TimeSheetService": {
+				"uri": "/sap/opu/odata/sap/API_MANAGE_WORKFORCE_TIMESHEET/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			},
+			"PWAService": {
+				"uri": "/sap/opu/odata/sap/YY1_I_PWA_EXT_API_CDS/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			},
+			"Payload": {
+				"uri": "model/Payload.json",
+				"type": "JSON"
+			},
+			"PayloadComboBox": {
+				"uri": "model/PayloadComboBox.json",
+				"type": "JSON"
+			},
+			"ActivityTypeComboBox": {
+				"uri": "model/ActivityTypeComboBox.json",
+				"type": "JSON"
+			}
+		}
+	},
+
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "sap-icon://detail-view",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		}
+	},
+
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "com.timereporting.view.App",
+			"type": "XML",
+			"async": true,
+			"id": "app"
+		},
+
+		"dependencies": {
+			"minUI5Version": "1.90.5",
+			"libs": {
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.f": {}
+			}
+		},
+
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "com.timereporting.i18n.i18n"
+				}
+			},
+			"": {
+				"dataSource": "mainService",
+				"preload": true
+			},
+			"TimeSheetModel": {
+				"dataSource": "TimeSheetService",
+				"settings":{
+					"defaultOperationMode" : "Server",
+					"defaultBindingMode": "OneTime",
+					"defaultCountMode" : "Request"
+				}
+			},
+			"PWAModel": {
+				"dataSource": "PWAService",
+				"settings":{
+					"defaultOperationMode" : "Server",
+					"defaultBindingMode": "OneTime",
+					"defaultCountMode" : "Request"
+				}
+			},
+			"Payload" : {
+				"dataSource": "Payload",
+				"type": "sap.ui.model.json.JSONModel"
+			},
+			"PayloadComboBox" : {
+				"dataSource": "PayloadComboBox",
+				"type": "sap.ui.model.json.JSONModel"
+			},
+			"ActivityTypeComboBox" : {
+				"dataSource": "ActivityTypeComboBox",
+				"type": "sap.ui.model.json.JSONModel"
+			}
+
+		},
+
+		"routing": {
+			"config": {
+				"routerClass": "sap.f.routing.Router",
+				"viewType": "XML",
+				"viewPath": "com.timereporting.view",
+				"controlId": "layout",
+				"controlAggregation": "beginColumnPages",
+				"bypassed": {
+					"target": "notFound"
+				},
+				"async": true
+			},
+
+			"routes": [
+				{
+					"pattern": "",
+					"name": "master",
+					"target": "master"
+				},
+				{
+					"pattern": "ProjectSet/{objectId}",
+					"name": "object",
+					"target": [
+						"master",
+						"object"
+					]
+				}
+			],
+
+			"targets": {
+				"master": {
+					"viewName": "Master",
+					"viewLevel": 1,
+					"viewId": "master"
+				},
+				"object": {
+					"viewName": "Detail",
+					"viewId": "detail",
+					"viewLevel": 1,
+					"controlAggregation": "midColumnPages"
+				},
+				"detailObjectNotFound": {
+					"viewName": "DetailObjectNotFound",
+					"viewId": "detailObjectNotFound",
+					"controlAggregation": "midColumnPages"
+				},
+				"notFound": {
+					"viewName": "NotFound",
+					"viewId": "notFound"
+				}
+			}
+		}
+	}
+}

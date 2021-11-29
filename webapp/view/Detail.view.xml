@@ -1,0 +1,183 @@
+<mvc:View
+	controllerName="com.timereporting.controller.Detail"
+	xmlns="sap.m"
+	xmlns:semantic="sap.f.semantic"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns:core="sap.ui.core"
+	xmlns:fb="sap.ui.comp.filterbar"
+	xmlns:l="sap.ui.layout" 
+	xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+
+	<semantic:SemanticPage
+		id="detailPage"
+		showFooter="true"
+		class = "sapUiNoContentPadding"
+		busy="{detailView>/busy}"
+		busyIndicatorDelay="{detailView>/delay}">
+		<semantic:titleHeading>
+			<Title
+				text="{ProjectName} ({ProjectID})"
+				level="H2"/>
+		</semantic:titleHeading>
+		<semantic:headerContent>
+			<ObjectAttribute title="{i18n>PM}" text="{ProjManagerName}"/>
+			<ObjectAttribute title="{i18n>Stage}" text="{StageDesc}"/>
+		</semantic:headerContent>
+		<semantic:content>
+		<l:VerticalLayout width="100%">
+				<fb:FilterBar reset="onReset" search="onSearch" showRestoreButton="true" showClearButton="true">
+			<fb:filterGroupItems>
+				<fb:FilterGroupItem groupName="filterGroup"  name="From" label="{i18n>detailViewFilterFrom}" partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<DatePicker displayFormat="dd.MM.yyyy" />
+					</fb:control>
+				</fb:FilterGroupItem>
+				<fb:FilterGroupItem groupName="filterGroup" name="To" label="{i18n>detailViewTableFilterTo}" partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<DatePicker displayFormat="dd.MM.yyyy" />
+					</fb:control>
+				</fb:FilterGroupItem>
+				<fb:FilterGroupItem groupName="filterGroup" name="Employee" label="{i18n>detailViewTableFilterEmployee}" partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<Input type="Text"/>
+					</fb:control>
+				</fb:FilterGroupItem>
+					<fb:FilterGroupItem groupName="filterGroup" name="Billing Type" label="{i18n>detailViewTableFilterBillingType}"  partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<ComboBox type="Text">
+							<items>
+								<core:Item key="" text="Billable"/>
+								<core:Item key="NON_BILL" text="Non Billable"/>
+							</items>
+						</ComboBox>
+					</fb:control>
+				</fb:FilterGroupItem>
+				<fb:FilterGroupItem groupName="filterGroup" name="Role" label="{i18n>detailViewTableFilterRole}"  partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<ComboBox type="Text" items="{path : 'ActivityTypeComboBox>/ActivitySet'}">
+							<items>
+								<core:Item key="{path : 'ActivityTypeComboBox>ActivityType'}" text="{path : 'ActivityTypeComboBox>RoleName'}" />
+							</items>
+						</ComboBox>
+					</fb:control>
+				</fb:FilterGroupItem>
+			</fb:filterGroupItems>
+	    </fb:FilterBar>
+			<Table
+				id="lineItemsList"
+				width="auto"
+				mode="MultiSelect"
+				selectAll = "false"
+				selectionChange="selectionChangeHandler"
+				items="{
+						path:'Payload>/EntitySet'}"
+				updateFinished=".onListUpdateFinished"
+				noDataText="{i18n>detailLineItemTableNoDataText}"
+				busyIndicatorDelay="{detailView>/lineItemTableDelay}"
+				>
+				<headerToolbar>
+					<Toolbar>
+						<Title
+							id="lineItemsTitle"
+							text="{detailView>/lineItemListTitle}"
+							titleStyle="H3"
+							level="H3"/>
+					</Toolbar>
+				</headerToolbar>
+				<columns>
+					<Column>
+						<Text text="{i18n>detailViewTableColumnDate}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableColumnEmployeeName}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableHours}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableWorckpakage}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableTimeSheetNote}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableProjectRole}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableBillingControlCategory}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableWorkItem}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableComboBoxNewProject}"/>
+					</Column>
+					<Column>
+						<Text text="{i18n>detailViewTableComboBoxNewWorkpackage}"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<ObjectIdentifier
+								title="{path: 'Payload>TimeSheetDate' , formatter : '.formatter.dateFormatter'}" />
+								<Text  text="{path: 'Payload>EmployeeName' }" />
+								<Text  text="{path: 'Payload>TimeSheetDataFields/RecordedHours' }" />
+								<Text  text="{path: 'Payload>WorkPackageName' }" />
+								<Text  text="{path: 'Payload>TimeSheetDataFields/TimeSheetNote' }" />
+								<Text  text="{path: 'Payload>TimeSheetDataFields/ActivityType' , formatter: '.formatter.activityTypeFormatter'}" />
+								<Text  text="{path: 'Payload>TimeSheetDataFields/BillingControlCategory' , formatter : '.formatter.billingTypeFormatter' }" />
+								<Text  text="{path: 'Payload>TimeSheetDataFields/WorkItem' , formatter : '.formatter.workItemFormatter' }" />
+								<ComboBox	
+									enabled="false"
+									id="comboBoxProjectID"
+										selectedKey = "{path: 'Payload>ProjectID' }" 
+										change = "onListSelectProjectIDChange"
+										items="{
+											path: 'PayloadComboBox>/ProjectSet'
+											}">
+										<core:Item key="{PayloadComboBox>ProjectID}" text="{PayloadComboBox>ProjectName}"  />
+								</ComboBox>
+								<ComboBox
+										enabled="false"
+										id="comboBoxWorkPackageID"
+										change = "onListSelectWorkpackageChange"
+										app:ProjectID="{Payload>ProjectID}"
+										items="{
+											path: '/WorkpackageSet'
+											}">
+										<core:Item key="{WorkPackageID}" text="{WorkPackageName}"  />
+								</ComboBox>
+								<!-- <DatePicker editable="false" dateValue="{Payload>TimeSheetDat}" displayFormat="dd.MM.yyyy"/> -->
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+			</l:VerticalLayout>
+		</semantic:content>
+		<semantic:closeAction>
+			<semantic:CloseAction
+					id="closeColumn"
+					press=".onCloseDetailPress"/>
+		</semantic:closeAction>
+
+		<semantic:fullScreenAction>
+			<semantic:FullScreenAction
+					id="enterFullScreen"
+					visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+					press=".toggleFullScreen"/>
+		</semantic:fullScreenAction>
+		<semantic:exitFullScreenAction>
+			<semantic:ExitFullScreenAction
+					id="exitFullScreen"
+					visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+					press=".toggleFullScreen"/>
+		</semantic:exitFullScreenAction>
+
+		<semantic:footerCustomActions>
+			<Button text="Save"  press="onSave" id="saveButtonID" enabled="false"/>
+		</semantic:footerCustomActions>
+			
+	</semantic:SemanticPage>
+
+</mvc:View>
