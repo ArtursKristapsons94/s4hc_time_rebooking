@@ -6,11 +6,10 @@ sap.ui.define([
 	"sap/ui/model/FilterOperator",
 	"sap/m/GroupHeaderListItem",
 	"sap/ui/Device",
-	"sap/ui/core/Fragment",
 	"../model/formatter",
-	"sap/ui/model/FilterType",
-	"sap/ui/core/BusyIndicator"
-], function (BaseController, JSONModel, Filter, Sorter, FilterOperator, GroupHeaderListItem, Device, Fragment, formatter, FilterType, BusyIndicator) {
+	"sap/ui/model/FilterType"
+], function (BaseController, JSONModel, Filter,
+	Sorter, FilterOperator, GroupHeaderListItem, Device, formatter, FilterType) {
 	"use strict";
 
 	return BaseController.extend("com.timereporting.controller.Master", {
@@ -27,14 +26,9 @@ sap.ui.define([
 		 */
 		onInit: function () {
 			// Control state model
-			var oList = this.byId("list"),
-				oViewModel = this._createViewModel(),
-				// Put down master list's original value for busy indicator delay,
-				// so it can be restored later on. Busy handling on the master list is
-				// taken care of by the master list itself.
-				iOriginalBusyDelay = oList.getBusyIndicatorDelay();
-
-
+			var oList = this.byId("list");
+			var oViewModel = this._createViewModel();
+			var iOriginalBusyDelay = oList.getBusyIndicatorDelay();
 			this._oList = oList;
 			// keeps the filter and search state
 			this._oListFilterState = {
@@ -67,12 +61,11 @@ sap.ui.define([
 			var aVisibleItems = this.getView().byId("list").getVisibleItems();
 			if (aVisibleItems.length !== 0) {
 				var mJsonForComboxBoxProjectId = aVisibleItems.map(function (oProperty) {
-					return { "ProjectID": oProperty.getAttributes()[0].getText(), "ProjectName": oProperty.getTitle() }
+					return { "ProjectID": oProperty.getAttributes()[0].getText(), "ProjectName": oProperty.getTitle() };
 				});
-				var oODataJSONModelForComboBox = this.getView().getModel("PayloadComboBox")
+				var oODataJSONModelForComboBox = this.getView().getModel("PayloadComboBox");
 				oODataJSONModelForComboBox.setData({ ProjectSet: mJsonForComboxBoxProjectId });
-			}
-			else{
+			} else {
 				this.getRouter().navTo("master");
 			}
 
@@ -93,7 +86,6 @@ sap.ui.define([
 			// update the master list object counter after new data is loaded
 			this._updateListItemCount(oEvent.getParameter("total"));
 		},
-
 
 		/**
 		 * Event handler for the master search field. Applies current
@@ -122,8 +114,8 @@ sap.ui.define([
 						new Filter("ProjectStage", FilterOperator.EQ, "P003")
 					],
 					and: true
-				})
-				this.byId("list").getBinding("items").filter(this._oListFilterState.aSearch, FilterType.Application)
+				});
+				this.byId("list").getBinding("items").filter(this._oListFilterState.aSearch, FilterType.Application);
 			} else {
 				this._oListFilterState.aSearch = [new Filter("ProjectStage", FilterOperator.EQ, "P003")];
 				this._applyFilterSearch();
@@ -165,10 +157,10 @@ sap.ui.define([
 		 * @private
 		 */
 		_applySortGroup: function (oEvent) {
-			var mParams = oEvent.getParameters(),
-				sPath,
-				bDescending,
-				aSorters = [];
+			var mParams = oEvent.getParameters();
+			var	sPath;
+			var	bDescending;
+			var	aSorters = [];
 			sPath = mParams.sortItem.getKey();
 			bDescending = mParams.sortDescending;
 			aSorters.push(new Sorter(sPath, bDescending));
@@ -181,8 +173,8 @@ sap.ui.define([
 		 * @public
 		 */
 		onSelectionChange: function (oEvent) {
-			var oList = oEvent.getSource(),
-				bSelected = oEvent.getParameter("selected");
+			var oList = oEvent.getSource();
+			var	bSelected = oEvent.getParameter("selected");
 
 			// skip navigation when deselecting an item in multi selection mode
 			if (!(oList.getMode() === "MultiSelect" && !bSelected)) {
@@ -221,14 +213,12 @@ sap.ui.define([
 		 * @public
 		 */
 		onNavBack: function () {
-			// eslint-disable-next-line sap-no-history-manipulation
 			history.go(-1);
 		},
 
 		/* =========================================================== */
 		/* begin: internal methods                                     */
 		/* =========================================================== */
-
 
 		_createViewModel: function () {
 			return new JSONModel({
@@ -243,7 +233,6 @@ sap.ui.define([
 		},
 
 		_onMasterMatched: function () {
-			//Set the layout property of the FCL control to 'OneColumn'
 			this.getModel("appView").setProperty("/layout", "OneColumn");
 		},
 
@@ -267,7 +256,7 @@ sap.ui.define([
 		 * @param {integer} iTotalItems the total number of items in the list
 		 * @private
 		 */
-		_updateListItemCount: function (iTotalItems) {
+		_updateListItemCount: function () {
 			var sTitle;
 			// only update the counter if the length is final
 			if (this._oList.getBinding("items").isLengthFinal()) {
@@ -281,8 +270,8 @@ sap.ui.define([
 		 * @private
 		 */
 		_applyFilterSearch: function () {
-			var aFilters = this._oListFilterState.aSearch.concat(this._oListFilterState.aFilter),
-				oViewModel = this.getModel("masterView");
+			var aFilters = this._oListFilterState.aSearch.concat(this._oListFilterState.aFilter);
+			var	oViewModel = this.getModel("masterView");
 			this._oList.getBinding("items").filter(aFilters, "Application");
 			// changes the noDataText of the list in case there are no filter results
 			if (aFilters.length !== 0) {
@@ -298,24 +287,25 @@ sap.ui.define([
 		 * @param {string} sFilterBarText the selected filter value
 		 * @private
 		 */
-		_updateFilterBar: function (sFilterBarText ) {
+		_updateFilterBar: function (sFilterBarText) {
 			var oViewModel = this.getModel("masterView");
 			oViewModel.setProperty("/isFilterBarVisible", (this._oListFilterState.aFilter.length > 0));
 			oViewModel.setProperty("/filterBarLabel", this.getResourceBundle().getText("masterFilterBarText", [sFilterBarText]));
 		},
 
 		getProjectVisibility: function (aRolePaths) {
-            // var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
-            // if(sFixedHashFromUrl === "Display") {
-            // var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
+			// var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
+			// if(sFixedHashFromUrl === "Display") {
+			// var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
 			var oODataModel = this.getView().getModel();
-			var aRoles = aRolePaths.map(sRolePath => {
-				return oODataModel.getProperty(`/${sRolePath}`);
+			var aRoles = aRolePaths.map(function (sRolePath) {
+				return oODataModel.getProperty("/" + sRolePath);
 			});
-			return aRoles.some(mRole => mRole.BusinessPartnerID === "9980000003");
-        }
-    // }
+			return aRoles.some(function (mRole) {
+				return mRole.BusinessPartnerID === "9980000003";
+			});
+		}
 
 	});
 
-}); 
+});
