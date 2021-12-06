@@ -365,14 +365,7 @@ sap.ui.define([
 
 		selectionChangeHandler: function (oEvent) {
 			if (this._oSelectAllButton === "true") {
-				this._oSelectAllButton = null;
-				var aSelectedListItems = oEvent.getParameter("listItems");
-				for (var i = 0; i < aSelectedListItems.length; i++) {
-					aSelectedListItems[i].getCells()[9].setValue("");
-					aSelectedListItems[i].getCells()[8].setValue("");
-					aSelectedListItems[i].getCells()[9].setEnabled(false);
-					aSelectedListItems[i].getCells()[8].setEnabled(false);
-				}
+				this.selectAllButtonsButtonsEnablingFunction(oEvent);
 			}
 			if (oEvent.getParameter("listItem").isSelected() === false) {
 				oEvent.getParameter("listItem").getCells()[9].setValue("");
@@ -398,24 +391,20 @@ sap.ui.define([
 			}
 		},
 
+		selectAllButtonsButtonsEnablingFunction : function(oEvent) {
+			this._oSelectAllButton = null;
+			var aSelectedListItems = oEvent.getParameter("listItems");
+			for (var i = 0; i < aSelectedListItems.length; i++) {
+				aSelectedListItems[i].getCells()[9].setValue("");
+				aSelectedListItems[i].getCells()[8].setValue("");
+				aSelectedListItems[i].getCells()[9].setEnabled(false);
+				aSelectedListItems[i].getCells()[8].setEnabled(false);
+			}
+		},
+
 		onSearch: function (oEvent) {
 			var aFilters = [];
-			var sFirstDayInPreviousMonth = this.firstDayInPreviousMonth(new Date());
-			var fromDateValue = oEvent.getParameter("selectionSet")[0].getDateValue();
-			var toDateValue = oEvent.getParameter("selectionSet")[1].getDateValue();
-			if (fromDateValue !== null && toDateValue !== null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, fromDateValue, toDateValue));
-
-			}
-			if (fromDateValue !== null && toDateValue === null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, fromDateValue));
-			}
-			if (fromDateValue === null && toDateValue !== null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, sFirstDayInPreviousMonth, toDateValue));
-			}
-			if (fromDateValue === null && toDateValue === null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, sFirstDayInPreviousMonth));
-			}
+			this.datesFilterFunction(aFilters,oEvent);
 
 			if (oEvent.getParameter("selectionSet")[2].getValue() !== null) {
 				aFilters.push(new Filter("EmployeeName", FilterOperator.Contains, oEvent.getParameter("selectionSet")[2].getValue()));
@@ -438,6 +427,24 @@ sap.ui.define([
 			});
 
 			this.byId("lineItemsList").getBinding("items").filter(oFilter, FilterType.Application);
+		},
+
+		datesFilterFunction : function(aFilters,oEvent) {
+			var sFirstDayInPreviousMonth = this.firstDayInPreviousMonth(new Date());
+			var fromDateValue = oEvent.getParameter("selectionSet")[0].getDateValue();
+			var toDateValue = oEvent.getParameter("selectionSet")[1].getDateValue();
+			if (fromDateValue !== null && toDateValue !== null) {
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, fromDateValue, toDateValue));
+			}
+			if (fromDateValue !== null && toDateValue === null) {
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, fromDateValue));
+			}
+			if (fromDateValue === null && toDateValue !== null) {
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, sFirstDayInPreviousMonth, toDateValue));
+			}
+			if (fromDateValue === null && toDateValue === null) {
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, sFirstDayInPreviousMonth));
+			}
 		}
 
 	});
