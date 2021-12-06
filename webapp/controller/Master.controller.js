@@ -298,18 +298,18 @@ sap.ui.define([
 		 * @param {string} sFilterBarText the selected filter value
 		 * @private
 		 */
-		_updateFilterBar: function (sFilterBarText) {
+		_updateFilterBar: function (sFilterBarText ) {
 			var oViewModel = this.getModel("masterView");
 			oViewModel.setProperty("/isFilterBarVisible", (this._oListFilterState.aFilter.length > 0));
 			oViewModel.setProperty("/filterBarLabel", this.getResourceBundle().getText("masterFilterBarText", [sFilterBarText]));
 		},
 
-		getProjectVisibility: function (aRolePaths = []) {
+		getProjectVisibility: function (aRolePaths) {
             // var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
             // if(sFixedHashFromUrl === "Display") {
             // var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
-			const oODataModel = this.getView().getModel();
-			const aRoles = aRolePaths.map(sRolePath => {
+			var oODataModel = this.getView().getModel();
+			var aRoles = aRolePaths.map(sRolePath => {
 				return oODataModel.getProperty(`/${sRolePath}`);
 			});
 			return aRoles.some(mRole => mRole.BusinessPartnerID === "9980000003");

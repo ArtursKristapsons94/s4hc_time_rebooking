@@ -25,7 +25,7 @@
 		</semantic:headerContent>
 		<semantic:content>
 		<l:VerticalLayout width="100%">
-				<fb:FilterBar reset="onReset" search="onSearch" showRestoreButton="true" showClearButton="true">
+				<fb:FilterBar reset="onReset" id="FBid" search="onSearch" showRestoreButton="true" showClearButton="true">
 			<fb:filterGroupItems>
 				<fb:FilterGroupItem groupName="filterGroup"  name="From" label="{i18n>detailViewFilterFrom}" partOfCurrentVariant="true" visibleInFilterBar="true">
 					<fb:control>

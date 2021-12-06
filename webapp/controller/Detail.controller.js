@@ -6,9 +6,8 @@ sap.ui.define([
 	"sap/ui/model/FilterOperator",
 	"sap/ui/model/Filter",
 	"sap/m/MessageBox",
-	"sap/ui/model/FilterType",
-	"sap/ui/core/BusyIndicator"
-], function (BaseController, JSONModel, formatter, mobileLibrary, FilterOperator, Filter, MessageBox, FilterType, BusyIndicator) {
+	"sap/ui/model/FilterType"
+], function (BaseController, JSONModel, formatter, mobileLibrary, FilterOperator, Filter, MessageBox, FilterType) {
 	"use strict";
 
 	// shortcut for sap.m.URLHelper
@@ -60,31 +59,26 @@ sap.ui.define([
 			);
 		},
 
-
 		/**
 		 * Updates the item count within the line item table's header
 		 * @param {object} oEvent an event containing the total number of items in the list
 		 * @private
 		 */
 		onListUpdateFinished: function (oEvent) {
-			var sTitle,
-				iTotalItems = oEvent.getParameter("total"),
-				oViewModel = this.getModel("detailView");
+			var sTitle;
+			var iTotalItems = oEvent.getParameter("total");
+			var oViewModel = this.getModel("detailView");
 
 			// only update the counter if the length is final
 			if (this.byId("lineItemsList").getBinding("items").isLengthFinal()) {
 				if (iTotalItems) {
 					sTitle = this.getResourceBundle().getText("detailLineItemTableHeadingCount", [iTotalItems]);
 				} else {
-					//Display 'Line Items' instead of 'Line items (0)'
 					sTitle = this.getResourceBundle().getText("detailLineItemTableHeading");
 				}
 				oViewModel.setProperty("/lineItemListTitle", sTitle);
 			}
-			this._busyDialog.close();
 		},
-
-
 
 		/* =========================================================== */
 		/* begin: internal methods                                     */
@@ -97,6 +91,10 @@ sap.ui.define([
 		 * @private
 		 */
 		_onObjectMatched: function (oEvent) {
+			var oFIlterGroupItems = this.getView().byId("FBid").getFilterGroupItems();
+			for (var i = 0; i <= oFIlterGroupItems.length - 1; i++) {
+				oFIlterGroupItems[i].getControl().setValue("");
+			}
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
 			this.prepeareFunctionForDetailViewTable(this.sObjectId);
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
@@ -111,21 +109,21 @@ sap.ui.define([
 		},
 
 		prepeareFunctionForDetailViewTable: function (sObjectId) {
-			var oData = this.getView().getModel("TimeSheetModel").read("/TimeSheetEntryCollection", {
-				success: function (oData2, oResponse) {
-					var oODataJSONModel = this.getView().getModel("Payload")
+			this.getView().getModel("TimeSheetModel").read("/TimeSheetEntryCollection", {
+				success: function (oData2) {
+					var oODataJSONModel = this.getView().getModel("Payload");
 					oODataJSONModel.setData({ mJsonEntity: oData2 });
-					this.oJsonForDetailTable = oODataJSONModel.getData().mJsonEntity.results
+					this.oJsonForDetailTable = oODataJSONModel.getData().mJsonEntity.results;
 					this.oJsonForDetailTable = oODataJSONModel.getData().mJsonEntity.results.filter(function (sValue) {
-						return sValue.TimeSheetDataFields.WBSElement.startsWith(sObjectId)
+						return sValue.TimeSheetDataFields.WBSElement.startsWith(sObjectId);
 					});
 					this.prepeareFunctionOfAdditionalPropertiesForModelWithSingleReadInModel(this.oJsonForDetailTable);
-					this.prepeareFunctionOfAdditionalPropertiesForModelWithDoubleReadInModel(this.oJsonForDetailTable, this.sObjectId)
+					this.prepeareFunctionOfAdditionalPropertiesForModelWithDoubleReadInModel(this.oJsonForDetailTable, this.sObjectId);
 				}.bind(this)
 			});
 		},
 
-		prepeareFunctionOfAdditionalPropertiesForModelWithDoubleReadInModel: function (oJsonForDetailTable, sObjectId) {
+		prepeareFunctionOfAdditionalPropertiesForModelWithDoubleReadInModel: function () {
 			this.getView().getModel("PWAModel").read("/YY1_I_PWA_EXT_API", {
 				urlParameters: {
 					"$select": "PersonWorkAgreement,BusinessPartner,FirstName,LastName"
@@ -134,19 +132,19 @@ sap.ui.define([
 					var aDataFromStaffingDataSet = oData2.results;
 					this.oJsonForDetailTable.map(function (oProperty) {
 						var aStaffingEntity = aDataFromStaffingDataSet.filter(function (oValue) {
-							return oValue.PersonWorkAgreement === (oProperty.PersonWorkAgreement)
-						})
+							return oValue.PersonWorkAgreement === (oProperty.PersonWorkAgreement);
+						});
 						if (aStaffingEntity[0] !== undefined) {
 							oProperty.EmployeeName = aStaffingEntity[0].FirstName + " " + aStaffingEntity[0].LastName;
 							oProperty.BusinessPartner = aStaffingEntity[0].BusinessPartner;
 						}
-					}.bind(this))
+					});
 					this.getView().getModel("Payload").setData({ EntitySet: this.oJsonForDetailTable });
 				}.bind(this)
 			});
 		},
 
-		prepeareFunctionOfAdditionalPropertiesForModelWithSingleReadInModel: function (oJsonForDetailTable) {
+		prepeareFunctionOfAdditionalPropertiesForModelWithSingleReadInModel: function () {
 			this.getView().getModel().read("/WorkpackageSet", {
 				urlParameters: {
 					"$select": "WorkPackageName,WorkPackageID"
@@ -155,14 +153,14 @@ sap.ui.define([
 					var aDataFromWorkPackageSet = oData2.results;
 					this.oJsonForDetailTable.map(function (oProperty) {
 						var aWorckpackageEntity = aDataFromWorkPackageSet.filter(function (oValue) {
-							return oValue.WorkPackageID === (oProperty.TimeSheetDataFields.WBSElement)
-						})
+							return oValue.WorkPackageID === (oProperty.TimeSheetDataFields.WBSElement);
+						});
 						if (aWorckpackageEntity[0] !== undefined) {
 							oProperty.WorkPackageName = aWorckpackageEntity[0].WorkPackageName;
 							oProperty.ProjectID = "";
 							oProperty.WorkPackage = aWorckpackageEntity[0].WorkPackageID;
 						}
-					}.bind(this))
+					});
 					this.getView().getModel("Payload").setData({ EntitySet: this.oJsonForDetailTable });
 					var oBindingContext = this.getView().getBindingContext();
 					if (oBindingContext !== undefined) {
@@ -174,18 +172,19 @@ sap.ui.define([
 								new Filter("TimeSheetStatus", FilterOperator.NE, '50')
 							],
 							and: true
-						})
-						this.byId("lineItemsList").getBinding("items").filter(oFilter, FilterType.Application)
+						});
+						this.byId("lineItemsList").getBinding("items").filter(oFilter, FilterType.Application);
 					}
-					this.getView().byId("lineItemsList").removeSelections()
+					this.getView().byId("lineItemsList").removeSelections();
 					this.getView().byId("saveButtonID").setEnabled(false);
+					this._busyDialog.close();
 				}.bind(this)
 			});
 		},
 
 		prepeareFunctionForDetailViewTableComboBoxProjectID: function (myData) {
 			var oEventBus = sap.ui.getCore().getEventBus();
-			oEventBus.publish("ChannelA", "testEvent", { myData });
+			oEventBus.publish("ChannelA", "testEvent", { myData: myData });
 		},
 
 		firstDayInPreviousMonth: function (yourDate) {
@@ -213,7 +212,7 @@ sap.ui.define([
 					dataRequested: function () {
 						oViewModel.setProperty("/busy", true);
 					},
-					dataReceived: function (oEvent) {
+					dataReceived: function () {
 						oViewModel.setProperty("/busy", false);
 					}
 				}
@@ -221,8 +220,8 @@ sap.ui.define([
 		},
 
 		_onBindingChange: function () {
-			var oView = this.getView(),
-				oElementBinding = oView.getElementBinding();
+			var oView = this.getView();
+			var oElementBinding = oView.getElementBinding();
 
 			// No data for the binding
 			if (!oElementBinding.getBoundContext()) {
@@ -233,12 +232,12 @@ sap.ui.define([
 				return;
 			}
 
-			var sPath = oElementBinding.getPath(),
-				oResourceBundle = this.getResourceBundle(),
-				oObject = oView.getModel().getObject(sPath),
-				sObjectId = oObject.ProjectID,
-				sObjectName = oObject.ChangedBy,
-				oViewModel = this.getModel("detailView");
+			var sPath = oElementBinding.getPath();
+			var oResourceBundle = this.getResourceBundle();
+			var oObject = oView.getModel().getObject(sPath);
+			var sObjectId = oObject.ProjectID;
+			var sObjectName = oObject.ChangedBy;
+			var oViewModel = this.getModel("detailView");
 
 			this.getOwnerComponent().oListSelector.selectAListItem(sPath);
 
@@ -250,10 +249,10 @@ sap.ui.define([
 
 		_onMetadataLoaded: function () {
 			// Store original busy indicator delay for the detail view
-			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay(),
-				oViewModel = this.getModel("detailView"),
-				oLineItemTable = this.byId("lineItemsList"),
-				iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
+			var iOriginalViewBusyDelay = this.getView().getBusyIndicatorDelay();
+			var oViewModel = this.getModel("detailView");
+			var oLineItemTable = this.byId("lineItemsList");
+			var iOriginalLineItemTableBusyDelay = oLineItemTable.getBusyIndicatorDelay();
 
 			// Make sure busy indicator is displayed immediately when
 			// detail view is displayed for the first time
@@ -298,10 +297,7 @@ sap.ui.define([
 		},
 		onSave: function () {
 			var oGlobalBusyDialog = new sap.m.BusyDialog();
-			oGlobalBusyDialog.open();
-
 			var aSelectedItems = this.getView().byId("lineItemsList").getSelectedItems();
-			var aDataForDelete = [];
 			var oModel = this.getView().getModel("TimeSheetModel");
 			oModel.setDeferredGroups(["foo"]);
 			var mParameters = {
@@ -313,7 +309,7 @@ sap.ui.define([
 				var oSelectedRowJsonData = oProperty.getBindingContext("Payload").getObject();
 				oSelectedRowJsonData.TimeSheetOperation = "U";
 				oSelectedRowJsonData.TimeSheetIsReleasedOnSave = true;
-				oSelectedRowJsonData.TimeSheetStatus = "10"
+				oSelectedRowJsonData.TimeSheetStatus = "10";
 				delete oSelectedRowJsonData.WorkPackage;
 				delete oSelectedRowJsonData.WorkPackageName;
 				delete oSelectedRowJsonData.__metadata;
@@ -322,40 +318,47 @@ sap.ui.define([
 				delete oSelectedRowJsonData.EmployeeName;
 				delete oSelectedRowJsonData.BusinessPartner;
 				oSelectedRowJsonData.TimeSheetDataFields.WBSElement = oProperty.getCells()[9].getSelectedKey();
-				return aDataForUpdate.push(oSelectedRowJsonData)
-			}.bind(this));
+				return aDataForUpdate.push(oSelectedRowJsonData);
+			});
+			var bState;
 			for (var i = 0; i <= aDataForUpdate.length - 1; i++) {
-				oModel.create("/TimeSheetEntryCollection", aDataForUpdate[i], mParameters)
-			};
+				oModel.create("/TimeSheetEntryCollection", aDataForUpdate[i], mParameters);
+				if (aDataForUpdate[i].TimeSheetDataFields.WBSElement === '') {
+					bState = false;
+				}
+			}
 
-			oModel.attachEventOnce("batchRequestCompleted", function (response, requests) {
-				if (response.getParameter("requests")[0].success === true) {
-					this.prepeareFunctionForDetailViewTable(this.sObjectId);
-					MessageBox.success(this.getView().getModel("i18n").getResourceBundle().getText("detailViewSucessMessageAfterSave"));
-					oGlobalBusyDialog.close();
-				}
-				else {
-					var sErrorMessage = JSON.parse(response.getParameter("requests")[0].response.responseText).error.message.value
-					MessageBox.error(sErrorMessage);
-					oGlobalBusyDialog.close();
-				}
-			}.bind(this));
-			oModel.submitChanges(mParameters);
+			if (bState === false) {
+				MessageBox.error(this.getView().getModel("i18n").getResourceBundle().getText("detailViewValidationMessage"));
+			} else {
+				oModel.attachEventOnce("batchRequestCompleted", function (response) {
+					oGlobalBusyDialog.open();
+					if (response.getParameter("requests")[0].success === true) {
+						this.prepeareFunctionForDetailViewTable(this.sObjectId);
+						MessageBox.success(this.getView().getModel("i18n").getResourceBundle().getText("detailViewSucessMessageAfterSave"));
+						oGlobalBusyDialog.close();
+					} else {
+						var sErrorMessage = JSON.parse(response.getParameter("requests")[0].response.responseText).error.message.value;
+						MessageBox.error(sErrorMessage);
+						oGlobalBusyDialog.close();
+					}
+				}.bind(this));
+				oModel.submitChanges(mParameters);
+			}
 		},
 		onListSelectProjectIDChange: function (oEvent) {
-			var iCurrentCell = oEvent.getSource().getId().split("lineItemsList-")[1]
+			var iCurrentCell = oEvent.getSource().getId().split("lineItemsList-")[1];
 			var iColumnLength = this.byId("lineItemsList").getColumns().length - 1;
-			var oCurrentCell = this.byId("lineItemsList").getItems()[iCurrentCell].getAggregation("cells")[iColumnLength]
+			var oCurrentCell = this.byId("lineItemsList").getItems()[iCurrentCell].getAggregation("cells")[iColumnLength];
 			if (oEvent.getSource().getSelectedItem() !== null) {
-				oCurrentCell.setSelectedKey("")
+				oCurrentCell.setSelectedKey("");
 				var aFilter = [];
 				aFilter.push(new Filter("WorkPackageID", FilterOperator.StartsWith, oEvent.getSource().getSelectedKey()));
 				oCurrentCell.getBinding("items").filter(aFilter);
-				oCurrentCell.setEnabled(true)
-			}
-			else {
+				oCurrentCell.setEnabled(true);
+			} else {
 				MessageBox.error(this.getView().getModel("i18n").getResourceBundle().getText("detailViewSucessMessageAfterSave"));
-				oCurrentCell.setSelectedKey("")
+				oCurrentCell.setSelectedKey("");
 				oCurrentCell.setEnabled(false);
 			}
 		},
@@ -371,21 +374,18 @@ sap.ui.define([
 					aSelectedListItems[i].getCells()[8].setEnabled(false);
 				}
 			}
-			var _oLastItemSelected = oEvent.getParameter("listItem");
 			if (oEvent.getParameter("listItem").isSelected() === false) {
 				oEvent.getParameter("listItem").getCells()[9].setValue("");
 				oEvent.getParameter("listItem").getCells()[8].setValue("");
 				oEvent.getParameter("listItem").getCells()[9].setEnabled(false);
 				oEvent.getParameter("listItem").getCells()[8].setEnabled(false);
-			}
-			else {
+			} else {
 				oEvent.getParameter("listItem").getCells()[9].setEnabled(true);
 				oEvent.getParameter("listItem").getCells()[8].setEnabled(true);
 			}
 			if (oEvent.getSource().getSelectedItems().length > 0) {
 				this.getView().byId("saveButtonID").setEnabled(true);
-			}
-			else {
+			} else {
 				this.getView().byId("saveButtonID").setEnabled(false);
 			}
 			if (oEvent.getSource()._selectAllCheckBox.getSelected() === true) {
@@ -398,49 +398,47 @@ sap.ui.define([
 			}
 		},
 
-
 		onSearch: function (oEvent) {
 			var aFilters = [];
 			var sFirstDayInPreviousMonth = this.firstDayInPreviousMonth(new Date());
 			var fromDateValue = oEvent.getParameter("selectionSet")[0].getDateValue();
-			var toDateValue = oEvent.getParameter("selectionSet")[1].getDateValue()
+			var toDateValue = oEvent.getParameter("selectionSet")[1].getDateValue();
 			if (fromDateValue !== null && toDateValue !== null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, fromDateValue, toDateValue))
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, fromDateValue, toDateValue));
 
 			}
 			if (fromDateValue !== null && toDateValue === null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, fromDateValue))
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, fromDateValue));
 			}
 			if (fromDateValue === null && toDateValue !== null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, sFirstDayInPreviousMonth, toDateValue))
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, sFirstDayInPreviousMonth, toDateValue));
 			}
 			if (fromDateValue === null && toDateValue === null) {
-				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, sFirstDayInPreviousMonth))
+				aFilters.push(new Filter("TimeSheetDate", FilterOperator.GE, sFirstDayInPreviousMonth));
 			}
 
 			if (oEvent.getParameter("selectionSet")[2].getValue() !== null) {
-				aFilters.push(new Filter("EmployeeName", FilterOperator.Contains, oEvent.getParameter("selectionSet")[2].getValue()))
+				aFilters.push(new Filter("EmployeeName", FilterOperator.Contains, oEvent.getParameter("selectionSet")[2].getValue()));
 			}
 
 			if (oEvent.getParameter("selectionSet")[3].getValue() !== "") {
-				aFilters.push(new Filter("EmployeeName", FilterOperator.Contains, oEvent.getParameter("selectionSet")[3].getSelectedKey()))
+				aFilters.push(new Filter("EmployeeName", FilterOperator.Contains, oEvent.getParameter("selectionSet")[3].getSelectedKey()));
 			}
 			if (oEvent.getParameter("selectionSet")[4].getValue() !== "") {
-				aFilters.push(new Filter("TimeSheetDataFields/ActivityType", FilterOperator.EQ, oEvent.getParameter("selectionSet")[4].getSelectedKey()))
+				aFilters.push(new Filter("TimeSheetDataFields/ActivityType", FilterOperator.EQ, oEvent.getParameter("selectionSet")[4].getSelectedKey()));
 			}
 
-			aFilters.push(new Filter("TimeSheetStatus", FilterOperator.NE, '60'))
-			aFilters.push(new Filter("TimeSheetStatus", FilterOperator.NE, '50'))
-			aFilters.push(new Filter("TimeSheetRecord", FilterOperator.NE, ''))
+			aFilters.push(new Filter("TimeSheetStatus", FilterOperator.NE, '60'));
+			aFilters.push(new Filter("TimeSheetStatus", FilterOperator.NE, '50'));
+			aFilters.push(new Filter("TimeSheetRecord", FilterOperator.NE, ''));
 
 			var oFilter = new Filter({
 				filters: aFilters,
 				and: true
 			});
 
-			this.byId("lineItemsList").getBinding("items").filter(oFilter, FilterType.Application)
-		},
-
+			this.byId("lineItemsList").getBinding("items").filter(oFilter, FilterType.Application);
+		}
 
 	});
 
