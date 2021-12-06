@@ -24,7 +24,6 @@ sap.ui.define([
 		/* =========================================================== */
 
 		onInit: function () {
-			this._busyDialog.open();
 			// Model used to manipulate control states. The chosen values make sure,
 			// detail page is busy indication immediately so there is no break in
 			// between the busy indication for loading the view's meta data
@@ -177,7 +176,6 @@ sap.ui.define([
 					}
 					this.getView().byId("lineItemsList").removeSelections();
 					this.getView().byId("saveButtonID").setEnabled(false);
-					this._busyDialog.close();
 				}.bind(this)
 			});
 		},
