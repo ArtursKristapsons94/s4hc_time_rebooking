@@ -158,9 +158,9 @@ sap.ui.define([
 		 */
 		_applySortGroup: function (oEvent) {
 			var mParams = oEvent.getParameters();
-			var	sPath;
-			var	bDescending;
-			var	aSorters = [];
+			var sPath;
+			var bDescending;
+			var aSorters = [];
 			sPath = mParams.sortItem.getKey();
 			bDescending = mParams.sortDescending;
 			aSorters.push(new Sorter(sPath, bDescending));
@@ -174,7 +174,7 @@ sap.ui.define([
 		 */
 		onSelectionChange: function (oEvent) {
 			var oList = oEvent.getSource();
-			var	bSelected = oEvent.getParameter("selected");
+			var bSelected = oEvent.getParameter("selected");
 
 			// skip navigation when deselecting an item in multi selection mode
 			if (!(oList.getMode() === "MultiSelect" && !bSelected)) {
@@ -271,7 +271,7 @@ sap.ui.define([
 		 */
 		_applyFilterSearch: function () {
 			var aFilters = this._oListFilterState.aSearch.concat(this._oListFilterState.aFilter);
-			var	oViewModel = this.getModel("masterView");
+			var oViewModel = this.getModel("masterView");
 			this._oList.getBinding("items").filter(aFilters, "Application");
 			// changes the noDataText of the list in case there are no filter results
 			if (aFilters.length !== 0) {
@@ -297,13 +297,24 @@ sap.ui.define([
 			// var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
 			// if(sFixedHashFromUrl === "Display") {
 			// var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
-			var oODataModel = this.getView().getModel();
-			var aRoles = aRolePaths.map(function (sRolePath) {
-				return oODataModel.getProperty("/" + sRolePath);
-			});
-			return aRoles.some(function (mRole) {
-				return mRole.BusinessPartnerID === "9980000003";
-			});
+			// var oODataModel = this.getView().getModel();
+			// var aRoles = aRolePaths.map(function (sRolePath) {
+			// 	return oODataModel.getProperty("/" + sRolePath);
+			// });
+			// return aRoles.some(function (mRole) {
+			// 	return mRole.BusinessPartnerID === "9980000003";
+			// });
+			var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
+			if (sFixedHashFromUrl === "#TimeRebooking-Edit") {
+				var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
+				var oODataModel = this.getView().getModel();
+				var aRoles = aRolePaths.map(function (sRolePath) {
+					return oODataModel.getProperty("/" + sRolePath);
+				});
+				return aRoles.some(function (mRole) {
+					return mRole.BusinessPartnerID === sBusinessPartnerID;
+				});
+			}
 		}
 
 	});
