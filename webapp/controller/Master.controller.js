@@ -7,9 +7,10 @@ sap.ui.define([
 	"sap/m/GroupHeaderListItem",
 	"sap/ui/Device",
 	"../model/formatter",
-	"sap/ui/model/FilterType"
+	"sap/ui/model/FilterType",
+	"sap/m/MessageBox"
 ], function (BaseController, JSONModel, Filter,
-	Sorter, FilterOperator, GroupHeaderListItem, Device, formatter, FilterType) {
+	Sorter, FilterOperator, GroupHeaderListItem, Device, formatter, FilterType,MessageBox) {
 	"use strict";
 
 	return BaseController.extend("com.timereporting.controller.Master", {
@@ -28,13 +29,15 @@ sap.ui.define([
 			// Control state model
 			var oList = this.byId("list");
 			var oViewModel = this._createViewModel();
-			var iOriginalBusyDelay = oList.getBusyIndicatorDelay();
+			// var iOriginalBusyDelay = oList.getBusyIndicatorDelay();
 			this._oList = oList;
 			// keeps the filter and search state
 			this._oListFilterState = {
 				aFilter: [],
 				aSearch: []
 			};
+			var oJsonModel = this._createViewModel();
+			this.setModel(oJsonModel, "masterJsonList");
 
 			this.setModel(oViewModel, "masterView");
 			// Make sure, busy indication is showing immediately so there is no
@@ -42,7 +45,8 @@ sap.ui.define([
 			// ended (see promise 'oWhenMetadataIsLoaded' in AppController)
 			oList.attachEventOnce("updateFinished", function () {
 				// Restore original busy indicator delay for the list
-				oViewModel.setProperty("/delay", iOriginalBusyDelay);
+				// oViewModel.setProperty("/delay", iOriginalBusyDelay);
+				oViewModel.setProperty("/busyTable", true);
 			});
 
 			this.getView().addEventDelegate({
@@ -57,19 +61,29 @@ sap.ui.define([
 			oEventBus.subscribe("ChannelA", "testEvent", this.getVisibleItemsFn, this);
 		},
 
-		getVisibleItemsFn: function () {
-			var aVisibleItems = this.getView().byId("list").getVisibleItems();
-			if (aVisibleItems.length !== 0) {
-				var mJsonForComboxBoxProjectId = aVisibleItems.map(function (oProperty) {
-					return { "ProjectID": oProperty.getAttributes()[0].getText(), "ProjectName": oProperty.getTitle() };
-				});
-				var oODataJSONModelForComboBox = this.getView().getModel("PayloadComboBox");
-				oODataJSONModelForComboBox.setData({ ProjectSet: mJsonForComboxBoxProjectId });
-			} else {
-				this.getRouter().navTo("master");
-			}
-
+		onExit: function () {
+			var eventBus = sap.ui.getCore().getEventBus();
+			eventBus.unsubscribe("ChannelA", "testEvent", this.getVisibleItemsFn, this);
 		},
+
+		getVisibleItemsFn: function () {
+				this.getView().getModel().read("/ProjectSet", {
+					filters: [new Filter({
+						path: "ProjectStage",
+						operator: FilterOperator.EQ,
+						value1: "P003"
+					})],
+					success: function (oData) {
+						var mJsonForComboxBoxProjectId = oData.results.map(function (oProperty) {
+							return { "ProjectID": oProperty.ProjectID, "ProjectName": oProperty.ProjectName };
+						});
+						var oODataJSONModelForComboBox = this.getView().getModel("PayloadComboBox");
+						oODataJSONModelForComboBox.setSizeLimit(2000);
+						oODataJSONModelForComboBox.setData({ ProjectSet: mJsonForComboxBoxProjectId });
+					}.bind(this)
+				});
+		},
+
 
 		/* =========================================================== */
 		/* event handlers                                              */
@@ -85,6 +99,12 @@ sap.ui.define([
 			this.getView().byId("list").removeSelections();
 			// update the master list object counter after new data is loaded
 			this._updateListItemCount(oEvent.getParameter("total"));
+			if (sap.ushell !== undefined) {
+				var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
+				if (sFixedHashFromUrl === "#TimeRebooking-Edit") {
+					this.byId("list").setGrowing(false);
+				}
+			}
 		},
 
 		/**
@@ -108,14 +128,25 @@ sap.ui.define([
 			var sQuery = oEvent.getParameter("query");
 
 			if (sQuery) {
-				this._oListFilterState.aSearch = new Filter({
-					filters: [
-						new Filter("ProjectName", FilterOperator.Contains, sQuery),
-						new Filter("ProjectStage", FilterOperator.EQ, "P003")
-					],
-					and: true
-				});
-				this.byId("list").getBinding("items").filter(this._oListFilterState.aSearch, FilterType.Application);
+				if (sQuery.match(/^[0-9]+$/) != null) {
+					this._oListFilterState.aSearch = new Filter({
+						filters: [
+							new Filter("ProjectID", FilterOperator.Contains, sQuery),
+							new Filter("ProjectStage", FilterOperator.EQ, "P003")
+						],
+						and: true
+					});
+					this.byId("list").getBinding("items").filter(this._oListFilterState.aSearch, FilterType.Application);
+				} else {
+					this._oListFilterState.aSearch = new Filter({
+						filters: [
+							new Filter("ProjectName", FilterOperator.Contains, sQuery),
+							new Filter("ProjectStage", FilterOperator.EQ, "P003")
+						],
+						and: true
+					});
+					this.byId("list").getBinding("items").filter(this._oListFilterState.aSearch, FilterType.Application);
+				}
 			} else {
 				this._oListFilterState.aSearch = [new Filter("ProjectStage", FilterOperator.EQ, "P003")];
 				this._applyFilterSearch();
@@ -225,6 +256,8 @@ sap.ui.define([
 				isFilterBarVisible: false,
 				filterBarLabel: "",
 				delay: 0,
+				busy: false,
+				busyTable: false,
 				title: this.getResourceBundle().getText("masterTitleCount", [0]),
 				noDataText: this.getResourceBundle().getText("masterListNoDataText"),
 				sortBy: "ChangedBy",
@@ -234,6 +267,78 @@ sap.ui.define([
 
 		_onMasterMatched: function () {
 			this.getModel("appView").setProperty("/layout", "OneColumn");
+
+			// var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
+			// if (sFixedHashFromUrl === "#TimeRebooking-Edit") {
+			// 	var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
+			// this.getView().getModel().read("/ProjectRoleSet", {
+			// 	urlParameters: {
+			// 		"$select": "BusinessPartnerID,ProjectID"
+			// 	},
+			// 	filters: [
+			// 		// new Filter({
+			// 		// 	path: "BusinessPartnerID",
+			// 		// 	operator: FilterOperator.EQ,
+			// 		// 	value1: "9980000505"
+			// 		// })
+			// 	],
+			// 	success: function (oData) {
+			// 		var aProjects = oData.results.map(item => item.ProjectID)
+			// 			.filter((value, index, self) => self.indexOf(value) === index)
+			// 		var aFilters = [];
+			// 		for (var iRowIndex = 0; iRowIndex < aProjects.length; iRowIndex++) {
+			// 			var oFilter = new sap.ui.model.Filter("ProjectID", sap.ui.model.FilterOperator.EQ, aProjects[iRowIndex]);
+			// 			aFilters.push(oFilter);
+			// 		}
+			// 		if(aFilters[0] == undefined) {
+						this.getView().getModel().read("/ProjectSet", {
+							urlParameters: {
+								"$select": "ProjectName,ProjectID,ProjectStage"
+							},
+							filters: [
+								// new Filter({
+								// 	filters: aFilters,
+								// 	and: false
+								// }),
+								new Filter({
+									path: "ProjectStage",
+									operator: FilterOperator.EQ,
+									value1: "P003"
+	
+								})
+							],
+							success: function (oData) {
+								var oODataJSONModel = this.getView().getModel("masterJsonList");
+								oODataJSONModel.setData({ mJsonEntity: oData.results });
+								this.getView().getModel("masterView").setProperty("/busyTable", false);
+							}.bind(this)
+						});
+			// 		} else {
+			// 			MessageBox.error(this.getView().getModel("i18n").getResourceBundle().getText("sErrorMessageNoProjects"));
+			// 			this.getView().getModel("masterView").setProperty("/busyTable", false);
+			// 		}
+			// 		// aFilters[aFilters.length] = new sap.ui.model.Filter({ filters: ["ProjectStage", sap.ui.model.FilterOperator.EQ, "P003"], and: true });
+			// 	}.bind(this)
+			// });
+			// } else {
+			// 	this.getView().getModel().read("/ProjectSet", {
+			// 		urlParameters: {
+			// 			"$select": "ProjectName,ProjectID,ProjectStage"
+			// 		},
+			// 		filters: [
+			// 			new Filter({
+			// 				path: "ProjectStage",
+			// 				operator: FilterOperator.EQ,
+			// 				value1: "P003"
+
+			// 			})],
+			// 		success: function (oData) {
+			// 			var oODataJSONModel = this.getView().getModel("masterJsonList");
+			// 			oODataJSONModel.setData({ mJsonEntity: oData.results });
+			// 			this.getView().getModel("masterView").setProperty("/busyTable", false);
+			// 		}.bind(this)
+			// 	});
+			// }
 		},
 
 		/**
@@ -247,7 +352,7 @@ sap.ui.define([
 			// set the layout property of FCL control to show two columns
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getRouter().navTo("object", {
-				objectId: oItem.getBindingContext().getProperty("ProjectID")
+				objectId: oItem.getAttributes()[0].getText()
 			}, bReplace);
 		},
 
@@ -294,27 +399,28 @@ sap.ui.define([
 		},
 
 		getProjectVisibility: function (aRolePaths) {
-			// var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
-			// if(sFixedHashFromUrl === "Display") {
-			// var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
+			// this.byId("list").setBusy(true);
 			// var oODataModel = this.getView().getModel();
-			// var aRoles = aRolePaths.map(function (sRolePath) {
+			// var aRoles = aRolePaths.map(function (sRolePath, iValue, sLength) {
+			// 	if (iValue === sLength.length - 1) {
+			// 		this.byId("list").setBusy(false);
+			// 	}
 			// 	return oODataModel.getProperty("/" + sRolePath);
-			// });
+			// }.bind(this));
 			// return aRoles.some(function (mRole) {
 			// 	return mRole.BusinessPartnerID === "9980000003";
 			// });
-			var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
-			if (sFixedHashFromUrl === "#TimeRebooking-Edit") {
-				var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
-				var oODataModel = this.getView().getModel();
-				var aRoles = aRolePaths.map(function (sRolePath) {
-					return oODataModel.getProperty("/" + sRolePath);
-				});
-				return aRoles.some(function (mRole) {
-					return mRole.BusinessPartnerID === sBusinessPartnerID;
-				});
-			}
+			// var sFixedHashFromUrl = sap.ushell.services.AppConfiguration.getCurrentApplication().sFixedShellHash;
+			// if (sFixedHashFromUrl === "#TimeRebooking-Edit") {
+			// 	var sBusinessPartnerID = sap.ushell.Container.getService("UserInfo").getId().substring(2);
+			// 	var oODataModel = this.getView().getModel();
+			// 	var aRoles = aRolePaths.map(function (sRolePath) {
+			// 		return oODataModel.getProperty("/" + sRolePath);
+			// 	});
+			// 	return aRoles.some(function (mRole) {
+			// 		return mRole.BusinessPartnerID === sBusinessPartnerID;
+			// 	});
+			// }
 		}
 
 	});

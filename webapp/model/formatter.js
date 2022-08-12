@@ -30,11 +30,13 @@ sap.ui.define([
 		},
 		dateFormatter:function(sValue) {
 			var dateFormat = sap.ui.core.format.DateFormat.getDateInstance({pattern : "dd.MM.yyyy " });   
-			return dateFormat.format(sValue);
+			return  dateFormat.format(sValue);
 		},
 		billingTypeFormatter:function(sValue) {
 			if (sValue === "") {
-				return sValue = "Billable"
+				return sValue = this.getView().getModel("i18n").getResourceBundle().getText("StatusFromaterBillable");
+			} else {
+				return sValue = this.getView().getModel("i18n").getResourceBundle().getText("StatusFromaterNonBillable");
 			}
 		},
 		enableSaveButton:function(sValue) {
@@ -156,6 +158,63 @@ sap.ui.define([
 				return sValue = "Travel"
 			}
 
+		},
+		StatusFormatter: function(sValue) {
+			if(sValue === "10"){
+				return sValue = this.getView().getModel("i18n").getResourceBundle().getText("StatusFromaterInProcess")
+			}
+			if(sValue === "20"){
+				return sValue = this.getView().getModel("i18n").getResourceBundle().getText("StatusFromaterReleasedForApproval")
+			}
+			if(sValue === "30") {
+				return sValue = this.getView().getModel("i18n").getResourceBundle().getText("StatusFromaterApproved")
+			}
+			if(sValue === "40") {
+				return sValue = this.getView().getModel("i18n").getResourceBundle().getText("StatusFormatterApprovalRejected")
+			}
+
+		},
+
+		billingTypeIconFormatter : function(sValue) {
+			if (sValue == ""){
+				return "sap-icon://paid-leave"
+			} else {
+				return "sap-icon://unpaid-leave"
+			}
+				
+		},
+		StatusIconFormatter: function(sValue) {
+			if(sValue === "10"){
+				return "sap-icon://request"
+			}
+			if(sValue === "20"){
+				return sValue = "sap-icon://paper-plane"
+			}
+			if(sValue === "30") {
+				return sValue = "sap-icon://employee-approvals"
+			}
+			if(sValue === "40") {
+				return sValue = "sap-icon://employee-rejections"
+			}
+		},
+		StatusStateFormatter : function(sValue) {
+			if(sValue === "30") {
+				return sValue = "Success"
+			}
+			if(sValue === "40") {
+				return sValue = "Error"
+			}
+		},
+
+		addCommaFirst: function(sValue) {
+			if (sValue !== "") {
+				return ", " + sValue
+			}
+		},
+		addCommaSecond: function(sValue) {
+			if (sValue !== "") {
+				return ", " + sValue
+			}
 		}
 	};
 });

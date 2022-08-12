@@ -6,6 +6,7 @@
 	xmlns:core="sap.ui.core"
 	xmlns:fb="sap.ui.comp.filterbar"
 	xmlns:l="sap.ui.layout" 
+	xmlns:custom="com.timereporting.control"
 	xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
 
 	<semantic:SemanticPage
@@ -25,19 +26,19 @@
 		</semantic:headerContent>
 		<semantic:content>
 		<l:VerticalLayout width="100%">
-				<fb:FilterBar reset="onReset" id="FBid" search="onSearch" showRestoreButton="true" showClearButton="true">
+				<fb:FilterBar  reset="onReset" id="FBid" search="onSearch" showRestoreButton="true" showClearButton="true">
 			<fb:filterGroupItems>
-				<fb:FilterGroupItem groupName="filterGroup"  name="From" label="{i18n>detailViewFilterFrom}" partOfCurrentVariant="true" visibleInFilterBar="true">
+				<fb:FilterGroupItem  groupName="filterGroup" mandatory="true" name="From" label="{i18n>detailViewFilterFrom}" partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<DatePicker displayFormat="dd.MM.yyyy" id="FBfrom"/>
+					</fb:control>
+				</fb:FilterGroupItem>
+				<fb:FilterGroupItem  groupName="filterGroup" name="To" mandatory="true"  label="{i18n>detailViewTableFilterTo}" partOfCurrentVariant="true" visibleInFilterBar="true">
 					<fb:control>
 						<DatePicker displayFormat="dd.MM.yyyy" />
 					</fb:control>
 				</fb:FilterGroupItem>
-				<fb:FilterGroupItem groupName="filterGroup" name="To" label="{i18n>detailViewTableFilterTo}" partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<DatePicker displayFormat="dd.MM.yyyy" />
-					</fb:control>
-				</fb:FilterGroupItem>
-				<fb:FilterGroupItem groupName="filterGroup" name="Employee" label="{i18n>detailViewTableFilterEmployee}" partOfCurrentVariant="true" visibleInFilterBar="true">
+				<fb:FilterGroupItem  groupName="filterGroup" name="Employee" mandatory="true"  label="{i18n>detailViewTableFilterEmployee}" partOfCurrentVariant="true" visibleInFilterBar="true">
 					<fb:control>
 						<Input type="Text"/>
 					</fb:control>
@@ -59,21 +60,45 @@
 								<core:Item key="{path : 'ActivityTypeComboBox>ActivityType'}" text="{path : 'ActivityTypeComboBox>RoleName'}" />
 							</items>
 						</ComboBox>
-					</fb:control>
+					</fb:control>	
+				</fb:FilterGroupItem>
+				<fb:FilterGroupItem groupName="filterGroup" name="Status" label="{i18n>detailViewTableFilterStatus}"  partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<ComboBox type="Text" items="">
+							<items>
+								<core:Item key="10" text="{i18n>StatusFromaterInProcess}"/>
+								<core:Item key="20" text="{i18n>StatusFromaterReleasedForApproval}"/>
+								<core:Item key="30" text="{i18n>StatusFromaterApproved}"/>
+								<core:Item key="40" text="{i18n>StatusFormatterApprovalRejected}"/>
+							</items>
+						</ComboBox>
+					</fb:control>	
+				</fb:FilterGroupItem>
+				<fb:FilterGroupItem groupName="filterGroup" name="Workpackage" label="{i18n>detailViewTableFilterWorkpackage}"  partOfCurrentVariant="true" visibleInFilterBar="true">
+					<fb:control>
+						<ComboBox type="Text" items="{path : 'PayloadWbsComboBox>/workpackageEntity'}">
+							<items>
+								<core:Item key="{path : 'PayloadWbsComboBox>WorkPackageID'}" text="{path : 'PayloadWbsComboBox>WorkPackageName'}" />
+							</items>
+						</ComboBox>
+					</fb:control>	
 				</fb:FilterGroupItem>
 			</fb:filterGroupItems>
 	    </fb:FilterBar>
 			<Table
 				id="lineItemsList"
-				width="auto"
+				modelContextChange=".onModelContextChange"
 				mode="MultiSelect"
+				busy="{detailView>/busyTable}"
+				busyIndicatorDelay="{detailView>/delayTable}"
 				selectAll = "false"
+				fixedLayout="false"
 				selectionChange="selectionChangeHandler"
 				items="{
-						path:'Payload>/EntitySet'}"
+						path:'Payload>/EntitySet',
+						events:{dataReceived: '.onDataReceived'}}"
 				updateFinished=".onListUpdateFinished"
 				noDataText="{i18n>detailLineItemTableNoDataText}"
-				busyIndicatorDelay="{detailView>/lineItemTableDelay}"
 				>
 				<headerToolbar>
 					<Toolbar>
@@ -85,70 +110,128 @@
 					</Toolbar>
 				</headerToolbar>
 				<columns>
-					<Column>
+				<Column vAlign="Top" width="25px" demandPopin="true" >
+						<Text text=""/>
+					</Column>
+					<Column vAlign="Top" width="100px" demandPopin="true">
 						<Text text="{i18n>detailViewTableColumnDate}"/>
 					</Column>
-					<Column>
-						<Text text="{i18n>detailViewTableColumnEmployeeName}"/>
-					</Column>
-					<Column>
+					<Column demandPopin="true"  vAlign="Top" width="100px">
+						<Text text="{i18n>detailViewTableColumnEmployeeName}" />
+					</Column > 
+					<Column demandPopin="true" vAlign="Top"  width="100px" hAlign="Center" >
 						<Text text="{i18n>detailViewTableHours}"/>
 					</Column>
-					<Column>
+					<Column vAlign="Top" demandPopin="true" hAlign="Center"   width="100px">
+						<Text text="{i18n>detailViewTableBillingControlCategory}" />
+					</Column>
+					<Column demandPopin="true" hAlign="Center"  vAlign="Top" width="75px">
+						<Text text="{i18n>detailViewTableStatus}" />
+					</Column>
+					<Column vAlign="Top" width="150px" demandPopin="true"> 
 						<Text text="{i18n>detailViewTableWorckpakage}"/>
 					</Column>
-					<Column>
-						<Text text="{i18n>detailViewTableTimeSheetNote}"/>
-					</Column>
-					<Column>
-						<Text text="{i18n>detailViewTableProjectRole}"/>
-					</Column>
-					<Column>
-						<Text text="{i18n>detailViewTableBillingControlCategory}"/>
-					</Column>
-					<Column>
+					<Column vAlign="Top" width="150px" demandPopin="true"> 
 						<Text text="{i18n>detailViewTableWorkItem}"/>
 					</Column>
-					<Column>
-						<Text text="{i18n>detailViewTableComboBoxNewProject}"/>
+					<Column demandPopin="true" vAlign="Top">
+						<Text text="{i18n>detailViewTableTimeSheetNote}"/>
 					</Column>
-					<Column>
+					<Column demandPopin="true" vAlign="Top" >
+						<Label text="{i18n>EXTN}" required="true"/>
+					</Column>
+					<Column demandPopin="true" vAlign="Top" >
+						<Label text="{i18n>INTN}" required="true"/>
+					</Column>
+					<Column demandPopin="true"  vAlign="Top">
+						<Text text="{i18n>detailViewTableComboBoxNewProject}"/>
+					</Column >
+					<Column demandPopin="true" vAlign="Top">
 						<Text text="{i18n>detailViewTableComboBoxNewWorkpackage}"/>
+					</Column >
+					<Column demandPopin="true"  vAlign="Top">
+						<Text text="{i18n>detailViewTableProjectRole}" />
+					</Column>
+					<Column demandPopin="true"  vAlign="Top">
+						<Text text="{i18n>detailViewTablePurchaseOrder}" />
 					</Column>
 				</columns>
 				<items>
-					<ColumnListItem>
+					<ColumnListItem vAlign="Middle">
 						<cells>
-							<ObjectIdentifier
-								title="{path: 'Payload>TimeSheetDate' , formatter : '.formatter.dateFormatter'}" />
+							<ObjectStatus width="50%"  icon="sap-icon://locked" visible="false" />
+							<ObjectIdentifier title="{path: 'Payload>TimeSheetDate' , formatter : '.formatter.dateFormatter'}" />
 								<Text  text="{path: 'Payload>EmployeeName' }" />
 								<Text  text="{path: 'Payload>TimeSheetDataFields/RecordedHours' }" />
-								<Text  text="{path: 'Payload>WorkPackageName' }" />
-								<Text  text="{path: 'Payload>TimeSheetDataFields/TimeSheetNote' }" />
-								<Text  text="{path: 'Payload>TimeSheetDataFields/ActivityType' , formatter: '.formatter.activityTypeFormatter'}" />
-								<Text  text="{path: 'Payload>TimeSheetDataFields/BillingControlCategory' , formatter : '.formatter.billingTypeFormatter' }" />
+								<ObjectStatus width="50%"  icon="{path: 'Payload>TimeSheetDataFields/BillingControlCategory', formatter : '.formatter.billingTypeIconFormatter' }" tooltip="{path: 'Payload>TimeSheetDataFields/BillingControlCategory', formatter : '.formatter.billingTypeFormatter' }" />
+								<ObjectStatus width="50%"  icon="{path: 'Payload>TimeSheetStatus', formatter : '.formatter.StatusIconFormatter' }" tooltip="{path: 'Payload>TimeSheetStatus' , formatter : '.formatter.StatusFormatter' }" state="{path: 'Payload>TimeSheetStatus' , formatter : '.formatter.StatusStateFormatter' }" />
+								<Text  text="{path: 'Payload>WorkPackageName' }"  />
 								<Text  text="{path: 'Payload>TimeSheetDataFields/WorkItem' , formatter : '.formatter.workItemFormatter' }" />
-								<ComboBox	
-									enabled="false"
-									id="comboBoxProjectID"
+								<TextArea  value="{path: 'Payload>TimeSheetDataFields/TimeSheetNote' }"  enabled="false"  />
+								<TextArea  value="{path: 'Payload>YY1_ExtTicketNummer_TIM' }"  enabled="false"   />
+								<TextArea  value="{path: 'Payload>YY1_InterneTicketNr_TIM' }"  enabled="false"  />
+								<custom:FeedComboBox	
+										enabled="false"
+										id="comboBoxProjectID"
+										width="100%"
+										filterSecondaryValues= "true"
+										showSecondaryValues= "true"
 										selectedKey = "{path: 'Payload>ProjectID' }" 
 										change = "onListSelectProjectIDChange"
 										items="{
-											path: 'PayloadComboBox>/ProjectSet'
+											path: 'PayloadComboBox>/ProjectSet',
+											sorter: {
+												path: 'ProjectID',
+												descending: false
+										}
 											}">
-										<core:Item key="{PayloadComboBox>ProjectID}" text="{PayloadComboBox>ProjectName}"  />
-								</ComboBox>
-								<ComboBox
+										<core:ListItem key="{PayloadComboBox>ProjectID}" text="{PayloadComboBox>ProjectID}"  additionalText="{PayloadComboBox>ProjectName}"/>
+								</custom:FeedComboBox>
+								<custom:FeedComboBox
 										enabled="false"
 										id="comboBoxWorkPackageID"
+										filterSecondaryValues= "true"
+										width="100%"
+										showSecondaryValues= "true"
 										change = "onListSelectWorkpackageChange"
 										app:ProjectID="{Payload>ProjectID}"
 										items="{
 											path: '/WorkpackageSet'
 											}">
-										<core:Item key="{WorkPackageID}" text="{WorkPackageName}"  />
-								</ComboBox>
-								<!-- <DatePicker editable="false" dateValue="{Payload>TimeSheetDat}" displayFormat="dd.MM.yyyy"/> -->
+										<core:ListItem key="{WorkPackageID}" text="{WorkPackageID}"  additionalText="{WorkPackageName}"/>
+								</custom:FeedComboBox>
+								<custom:FeedComboBox	
+										enabled="false"
+										id="comboBoxActivityType"
+										width="100%"
+										filterSecondaryValues= "true"
+										showSecondaryValues= "true"
+										value = "{path: 'Payload>TimeSheetDataFields/ActivityType' , formatter: '.formatter.activityTypeFormatter' }"
+										 	items="{
+											path: 'PayloadComboBoxRoles>/mRolesEntity',
+											filters: [{
+												path: 'ResType',
+      											operator: 'EQ',
+            									value1: '0ACT' 
+												}]
+											}">
+										<core:ListItem key="{PayloadComboBoxRoles>ResourceId}" text="{path: 'PayloadComboBoxRoles>ResourceId',formatter: '.formatter.activityTypeFormatter'}" 
+														additionalText="{PayloadComboBoxRoles>BillingControlCategoryID}{path: 'PayloadComboBoxRoles>DelvryServOrgT',formatter: '.formatter.addCommaFirst'}{path : 'PayloadComboBoxRoles>WorkitemName',formatter: '.formatter.addCommaSecond'}"/>
+								</custom:FeedComboBox>
+								<custom:FeedComboBox	
+										enabled="false"
+										id="comboBoxPurchaseOrder"
+										width="100%"
+										visible="{= ${Payload>TimeSheetDataFields/PurchaseOrderItem} !== '0' }"
+										filterSecondaryValues= "true"
+										showSecondaryValues= "true"
+										value = "{path: 'Payload>TimeSheetDataFields/PurchaseOrder'}"
+										change = "onListSelectPurchaseOrderChange"
+										items="{
+											path: 'PayloadPurchaseOrder>/PoSet'
+											}">
+										<core:ListItem key="{PayloadPurchaseOrder>PurchaseOrder}" text="{PayloadPurchaseOrder>PurchaseOrder}"  additionalText="{PayloadPurchaseOrder>PurchaseOrderItem}"/>
+								</custom:FeedComboBox>		
 						</cells>
 					</ColumnListItem>
 				</items>
@@ -175,7 +258,7 @@
 		</semantic:exitFullScreenAction>
 
 		<semantic:footerCustomActions>
-			<Button text="Save"  press="onSave" id="saveButtonID" enabled="false"/>
+			<Button text="{i18n>detailViewSaveButton}"  press="onSave" id="saveButtonID" enabled="false"/>
 		</semantic:footerCustomActions>
 			
 	</semantic:SemanticPage>

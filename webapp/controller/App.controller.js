@@ -7,9 +7,9 @@ sap.ui.define([
 	return BaseController.extend("com.timereporting.controller.App", {
 
 		onInit : function () {
-			var oViewModel,
-				fnSetAppNotBusy,
-				iOriginalBusyDelay = this.getView().getBusyIndicatorDelay();
+			var oViewModel;
+			var	fnSetAppNotBusy;
+			var	iOriginalBusyDelay = this.getView().getBusyIndicatorDelay();
 
 			oViewModel = new JSONModel({
 				busy : true,

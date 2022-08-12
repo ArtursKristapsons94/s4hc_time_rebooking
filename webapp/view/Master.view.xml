@@ -19,20 +19,18 @@
 			<List
 				id="list"
 				width="auto"
+				growing="true"
+				busy="{masterView>/busyTable}"
+				growingThreshold="100"
 				class="sapFDynamicPageAlignContent"
 				items="{
-					path: '/ProjectSet',
+					path: 'masterJsonList>/mJsonEntity',
 					sorter: {
 						path: 'ProjectID',
 						descending: false
 					},
-					filters: [{
-						path: 'ProjectStage',
-      					operator: 'EQ',
-            			value1: 'P003' 
-					}],
 					groupHeaderFactory: '.createGroupHeader',
-					parameters: { expand : 'ProjectRoleSet' }}" 
+					parameters: { expand : 'ProjectRoleSet' , operationMode: 'Client' }}" 
 				busyIndicatorDelay="{masterView>/delay}"
 				noDataText="{masterView>/noDataText}"
 				mode="{= ${device>/system/phone} ? 'None' : 'SingleSelectMaster'}"
@@ -62,9 +60,9 @@
 						type="Navigation"
 						id="ObjectListItem"
 						press=".onSelectionChange"
-						title="{path: 'ProjectName'}"
+						title="{path: 'masterJsonList>ProjectName'}"
 						visible= "{path: 'ProjectRoleSet' , formatter:'.getProjectVisibility'}">
-						<ObjectAttribute text="{ProjectID}" visible="false" />
+						<ObjectAttribute text="{masterJsonList>ProjectID}" visible="true" />
 					</ObjectListItem>
 				</items>
 			</List>

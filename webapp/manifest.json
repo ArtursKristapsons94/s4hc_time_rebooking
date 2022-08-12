@@ -1,15 +1,20 @@
 {
 	"_version": "1.32.0",
-
 	"sap.app": {
 		"id": "com.timereporting",
 		"type": "application",
-		"i18n": "i18n/i18n.properties",
+		"i18n": {
+			"bundleUrl": "i18n/i18n.properties",
+			"supportedLocales": [
+				"",
+				"de"
+			],
+			"fallbackLocale": ""
+		},
 		"title": "Time Rebooking Application",
 		"description": "{{appDescription}}",
-
 		"applicationVersion": {
-		"version": "1.0.0"
+			"version": "1.0.0"
 		},
 		"resources": "resources.json",
 		"dataSources": {
@@ -35,6 +40,13 @@
 					"odataVersion": "2.0"
 				}
 			},
+			"POService": {
+				"uri": "/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			},
 			"Payload": {
 				"uri": "model/Payload.json",
 				"type": "JSON"
@@ -43,13 +55,24 @@
 				"uri": "model/PayloadComboBox.json",
 				"type": "JSON"
 			},
+			"PayloadPurchaseOrder": {
+				"uri": "model/PayloadPurchaseOrder.json",
+				"type": "JSON"
+			},
 			"ActivityTypeComboBox": {
 				"uri": "model/ActivityTypeComboBox.json",
+				"type": "JSON"
+			},
+			"PayloadComboBoxRoles": {
+				"uri": "model/PayloadComboBoxRoles.json",
+				"type": "JSON"
+			},
+			"PayloadWbsComboBox": {
+				"uri": "model/PayloadWbsComboBox.json",
 				"type": "JSON"
 			}
 		}
 	},
-
 	"sap.ui": {
 		"technology": "UI5",
 		"icons": {
@@ -66,7 +89,6 @@
 			"phone": true
 		}
 	},
-
 	"sap.ui5": {
 		"rootView": {
 			"viewName": "com.timereporting.view.App",
@@ -74,63 +96,108 @@
 			"async": true,
 			"id": "app"
 		},
-
 		"dependencies": {
 			"minUI5Version": "1.90.5",
 			"libs": {
 				"sap.ui.core": {},
 				"sap.m": {},
-				"sap.f": {}
+				"sap.f": {},
+				"sap.ui.layout" : {},
+				"sap.ui.comp": {}
 			}
 		},
-
 		"contentDensities": {
 			"compact": true,
 			"cozy": true
 		},
-
 		"models": {
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
-					"bundleName": "com.timereporting.i18n.i18n"
+					"bundleUrl": "i18n/i18n.properties",
+					"supportedLocales": [
+						"",
+						"de"
+					],
+					"fallbackLocale": ""
 				}
 			},
 			"": {
 				"dataSource": "mainService",
-				"preload": true
+				"preload": true,
+				"settings": {
+					"defaultCountMode": "None",
+					"defaultBindingMode": "OneWay"
+				}
 			},
 			"TimeSheetModel": {
 				"dataSource": "TimeSheetService",
-				"settings":{
-					"defaultOperationMode" : "Server",
-					"defaultBindingMode": "OneTime",
-					"defaultCountMode" : "Request"
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "OneWay",
+					"defaultCountMode": "None"
+				}
+			},
+			"POService": {
+				"dataSource": "POService",
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "OneWay",
+					"defaultCountMode": "None"
 				}
 			},
 			"PWAModel": {
 				"dataSource": "PWAService",
-				"settings":{
-					"defaultOperationMode" : "Server",
-					"defaultBindingMode": "OneTime",
-					"defaultCountMode" : "Request"
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "OneWay",
+					"defaultCountMode": "None"
 				}
 			},
-			"Payload" : {
+			"Payload": {
 				"dataSource": "Payload",
-				"type": "sap.ui.model.json.JSONModel"
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {
+					"defaultCountMode": "None"
+				}
+				
 			},
-			"PayloadComboBox" : {
+			"PayloadComboBox": {
 				"dataSource": "PayloadComboBox",
-				"type": "sap.ui.model.json.JSONModel"
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {
+					"defaultCountMode": "None"
+				}
 			},
-			"ActivityTypeComboBox" : {
+			"PayloadPurchaseOrder": {
+				"dataSource": "PayloadPurchaseOrder",
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {
+					"defaultCountMode": "None"
+				}
+			},
+			"ActivityTypeComboBox": {
 				"dataSource": "ActivityTypeComboBox",
-				"type": "sap.ui.model.json.JSONModel"
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {
+					"defaultCountMode": "None"
+				}
+			},
+			"PayloadComboBoxRoles": {
+				"dataSource": "PayloadComboBoxRoles",
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {
+					"defaultCountMode": "None"
+				}
+			},
+			"PayloadWbsComboBox": {
+				"dataSource": "PayloadWbsComboBox",
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {
+					"defaultCountMode": "None"
+				}
 			}
-
 		},
-
 		"routing": {
 			"config": {
 				"routerClass": "sap.f.routing.Router",
@@ -143,7 +210,6 @@
 				},
 				"async": true
 			},
-
 			"routes": [
 				{
 					"pattern": "",
@@ -159,7 +225,6 @@
 					]
 				}
 			],
-
 			"targets": {
 				"master": {
 					"viewName": "Master",

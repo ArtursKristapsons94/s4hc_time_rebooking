@@ -63,8 +63,8 @@
 
 			this.oWhenListLoadingIsDone.then(
 				function () {
-					var oList = this._oList,
-						oSelectedItem;
+					var oList = this._oList;
+					var oSelectedItem;
 
 					if (oList.getMode() === "None") {
 						return;
@@ -96,7 +96,6 @@
 		 * @public
 		 */
 		clearMasterListSelection : function () {
-			//use promise to make sure that 'this._oList' is available
 			this._oWhenListHasBeenSet.then(function () {
 				this._oList.removeSelections(true);
 			}.bind(this));
