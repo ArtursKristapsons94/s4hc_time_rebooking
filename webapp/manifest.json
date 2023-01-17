@@ -25,9 +25,16 @@
 				"settings": {
 					"odataVersion": "2.0"
 				}
-			},
+			},		
 			"PWAService": {
 				"uri": "/sap/opu/odata/sap/YY1_I_PWA_EXT_API_CDS/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0"
+				}
+			},
+			"POService": {
+				"uri": "/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/",
 				"type": "OData",
 				"settings": {
 					"odataVersion": "2.0"
@@ -134,6 +141,14 @@
 				"type": "sap.ui.model.odata.v2.ODataModel",
 				"preload": true,
 				"settings": {
+					"defaultCountMode": "None"
+				}
+			},
+			"POService": {
+				"dataSource": "POService",
+				"settings": {
+					"defaultOperationMode": "Server",
+					"defaultBindingMode": "OneWay",
 					"defaultCountMode": "None"
 				}
 			},
