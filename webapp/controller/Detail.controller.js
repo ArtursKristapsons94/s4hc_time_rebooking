@@ -112,31 +112,26 @@ sap.ui.define([
 		 */
 		_onObjectMatched: function (oEvent) {
 			this.byId("lineItemsList")._selectAllCheckBox.setVisible(false);
-			if (performance.navigation.type !== performance.navigation.TYPE_RELOAD) {
-				this.getModel("MasterModel").clearFilters();
-				this.sObjectId = oEvent.getParameter("arguments").objectId;
-				// this.prepeareFunctionForDetailViewTable(this.sObjectId);
-				this.getView().getModel("detailView").setProperty("/busyTable", true);
-				this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
-				this.getModel().metadataLoaded().then(async () => {
-					var oFilter = new sap.ui.model.Filter("EmployeeName", FilterOperator.EQ, "tratatatatatat");
-					var aFilters = [];
-					aFilters.push(oFilter);
-					this.byId("lineItemsList").getBinding("items").filter(oFilter);
-					this.prepeareFunctionForDetailViewTableComboBoxProjectID();
-					try {
-						await this.getModel("MasterModel").prepeareComboBoxForWorkpackage(this.sObjectId);
-					} finally {
-						this.getView().getModel("detailView").setProperty("/busyTable", false);
-					}
-					var sObjectPath = this.getModel().createKey("ProjectSet", {
-						ProjectID: this.sObjectId
-					});
-					this._bindView("/" + sObjectPath);
+			this.getModel("MasterModel").clearFilters();
+			this.sObjectId = oEvent.getParameter("arguments").objectId;
+			this.getModel("detailView").setProperty("/busy", true);
+			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
+			this.getModel().metadataLoaded().then(async () => {
+				var oFilter = new sap.ui.model.Filter("EmployeeName", FilterOperator.EQ, "tratatatatatat");
+				var aFilters = [];
+				aFilters.push(oFilter);
+				this.byId("lineItemsList").getBinding("items").filter(oFilter);
+				this.prepeareFunctionForDetailViewTableComboBoxProjectID();
+				try {
+					await this.getModel("MasterModel").prepeareComboBoxForWorkpackage(this.sObjectId);
+				} finally {
+					this.getModel("detailView").setProperty("/busy", false);
+				}
+				var sObjectPath = this.getModel().createKey("ProjectSet", {
+					ProjectID: this.sObjectId
 				});
-			} else {
-				this.onCloseDetailPress();
-			}
+				this._bindView("/" + sObjectPath);
+			});
 		},
 
 		enrichDataWithTimesheetAPIData: async function (sObjectId) {

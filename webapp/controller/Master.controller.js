@@ -27,6 +27,7 @@ sap.ui.define([
 		 */
 		onInit: function () {
 			// Control state model
+			this.getRouter().navTo("master");
 			var oList = this.byId("list");
 			var oViewModel = this._createViewModel();
 			// var iOriginalBusyDelay = oList.getBusyIndicatorDelay();

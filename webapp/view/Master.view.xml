@@ -61,7 +61,7 @@
 						id="ObjectListItem"
 						press=".onSelectionChange"
 						title="{path: 'masterJsonList>ProjectName'}"
-						visible= "{path: 'ProjectRoleSet' , formatter:'.getProjectVisibility'}">
+						visible= "{path: 'ProjectRoleSet' }">
 						<ObjectAttribute text="{masterJsonList>ProjectID}" visible="true" />
 					</ObjectListItem>
 				</items>
