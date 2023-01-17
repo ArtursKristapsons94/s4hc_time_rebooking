@@ -114,7 +114,7 @@ sap.ui.define([
 			this.byId("lineItemsList")._selectAllCheckBox.setVisible(false);
 			this.getModel("MasterModel").clearFilters();
 			this.sObjectId = oEvent.getParameter("arguments").objectId;
-			this.getModel("detailView").setProperty("/busy", true);
+			// this.getModel("detailView").setProperty("/busy", true);
 			this.getModel("appView").setProperty("/layout", "TwoColumnsMidExpanded");
 			this.getModel().metadataLoaded().then(async () => {
 				var oFilter = new sap.ui.model.Filter("EmployeeName", FilterOperator.EQ, "tratatatatatat");
@@ -169,7 +169,7 @@ sap.ui.define([
 			var oViewModel = this.getModel("detailView");
 
 			// If the view was not bound yet its not busy, only if the binding requests data it is set to busy again
-			oViewModel.setProperty("/busy", false);
+			// oViewModel.setProperty("/busy", false);
 
 			this.getView().bindElement({
 				path: sObjectPath,
