@@ -90,28 +90,32 @@ sap.ui.define([
         datesFilterFunction: function () {
             var aFilters = [];
             const mFilters = this._oMasterModel.getProperty("/Filters");
-            var dFirstDayInPreviousMonth = this.firstDayInPreviousMonth(new Date());
-            var dFifthDateOfCorrentMonth = this.fifthDayOfCurrentMonth(new Date());
-            var dFiltredDateToValue = new Date(mFilters.DateTo)
-            dFiltredDateToValue.setDate(dFiltredDateToValue.getDate() + 1)
+
+            // Check if both DateFrom and DateTo filters are present
             if (mFilters.DateFrom && mFilters.DateFrom) {
                 const dDateFromUTC = this._dateToUTC(mFilters.DateFrom);
                 const dDateToUTC = this._dateToUTC(mFilters.DateTo);
                 aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, dDateFromUTC, dDateToUTC));
             }
-            if (mFilters.DateFrom && !mFilters.DateFrom) {
+            // Check if only DateFrom filter is present
+            else if (mFilters.DateFrom) {
                 var dNextDate = mFilters.DateFrom;
                 const dDateFromUTC = this._dateToUTC(fromDateValue);
                 dNextDate = new Date(dNextDate);
                 dNextDate = dNextDate.setDate(dNextDate.getDate() + 1);
                 aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, this._dateToUTC(fromDateValue), dNextDate));
             }
-            if (!mFilters.DateFrom && mFilters.DateFrom) {
-                aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, this._dateToUTC(dFirstDayInPreviousMonth), this._dateToUTC(dFiltredDateToValue)));
+            // Check if only DateTo filter is present
+            else if (mFilters.DateTo) {
+                var dFiltredDateToValue = new Date(mFilters.DateTo);
+                dFiltredDateToValue.setDate(dFiltredDateToValue.getDate() + 1)
+                aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, this._dateToUTC(this.firstDayInPreviousMonth(new Date())), this._dateToUTC(dFiltredDateToValue)));
             }
-            if (!mFilters.DateFrom && !mFilters.DateFrom) {
-                aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, this._dateToUTC(dFirstDayInPreviousMonth), this._dateToUTC(dFifthDateOfCorrentMonth)));
+            // If no filters are present, use default values
+            else {
+                aFilters.push(new Filter("TimeSheetDate", FilterOperator.BT, this._dateToUTC(this.firstDayInPreviousMonth(new Date())), this._dateToUTC(this.fifthDayOfCurrentMonth(new Date()))));
             }
+
             return aFilters;
         },
 
@@ -177,6 +181,9 @@ sap.ui.define([
                                 return orFilters.push(new Filter("PersonWorkAgreement", FilterOperator.EQ, oProperty.PersonWorkAgreement));
                             });
                             resolve();
+                        },
+                        error: function (mError) {
+                            reject(mError);
                         }
                     });
                 });
@@ -204,6 +211,9 @@ sap.ui.define([
                         });
                         this._oTimesheetData.setData(oFiltredPayload);
                         resolve();
+                    },
+                    error: function (mError) {
+                        reject(mError);
                     }
                 });
             });
@@ -233,6 +243,9 @@ sap.ui.define([
                             }
                         });
                         resolve();
+                    },
+                    error: function (mError) {
+                        reject(mError);
                     }
                 });
             }.bind(this));
@@ -264,6 +277,9 @@ sap.ui.define([
                             }
                         });
                         resolve();
+                    },
+                    error: function (mError) {
+                        reject(mError);
                     }
                 });
             }.bind(this));
