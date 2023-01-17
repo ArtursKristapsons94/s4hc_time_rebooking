@@ -5,262 +5,546 @@
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns:core="sap.ui.core"
 	xmlns:fb="sap.ui.comp.filterbar"
-	xmlns:l="sap.ui.layout" 
+	xmlns:l="sap.ui.layout"
 	xmlns:custom="com.timereporting.control"
-	xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
-
+	xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+>
 	<semantic:SemanticPage
 		id="detailPage"
 		showFooter="true"
-		class = "sapUiNoContentPadding"
+		class="sapUiNoContentPadding"
 		busy="{detailView>/busy}"
-		busyIndicatorDelay="{detailView>/delay}">
+		busyIndicatorDelay="{detailView>/delay}"
+	>
 		<semantic:titleHeading>
 			<Title
 				text="{ProjectName} ({ProjectID})"
-				level="H2"/>
+				level="H2"
+			/>
 		</semantic:titleHeading>
 		<semantic:headerContent>
-			<ObjectAttribute title="{i18n>PM}" text="{ProjManagerName}"/>
-			<ObjectAttribute title="{i18n>Stage}" text="{StageDesc}"/>
+			<ObjectAttribute
+				title="{i18n>PM}"
+				text="{ProjManagerName}"
+			/>
+			<ObjectAttribute
+				title="{i18n>Stage}"
+				text="{StageDesc}"
+			/>
 		</semantic:headerContent>
 		<semantic:content>
-		<l:VerticalLayout width="100%">
-				<fb:FilterBar  reset="onReset" id="FBid" search="onSearch" showRestoreButton="true" showClearButton="true">
-			<fb:filterGroupItems>
-				<fb:FilterGroupItem  groupName="filterGroup" mandatory="true" name="From" label="{i18n>detailViewFilterFrom}" partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<DatePicker displayFormat="dd.MM.yyyy" id="FBfrom"/>
-					</fb:control>
-				</fb:FilterGroupItem>
-				<fb:FilterGroupItem  groupName="filterGroup" name="To" mandatory="true"  label="{i18n>detailViewTableFilterTo}" partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<DatePicker displayFormat="dd.MM.yyyy" />
-					</fb:control>
-				</fb:FilterGroupItem>
-				<fb:FilterGroupItem  groupName="filterGroup" name="Employee" mandatory="true"  label="{i18n>detailViewTableFilterEmployee}" partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<Input type="Text"/>
-					</fb:control>
-				</fb:FilterGroupItem>
-					<fb:FilterGroupItem groupName="filterGroup" name="Billing Type" label="{i18n>detailViewTableFilterBillingType}"  partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<ComboBox type="Text">
-							<items>
-								<core:Item key="" text="Billable"/>
-								<core:Item key="NON_BILL" text="Non Billable"/>
-							</items>
-						</ComboBox>
-					</fb:control>
-				</fb:FilterGroupItem>
-				<fb:FilterGroupItem groupName="filterGroup" name="Role" label="{i18n>detailViewTableFilterRole}"  partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<ComboBox type="Text" items="{path : 'ActivityTypeComboBox>/ActivitySet'}">
-							<items>
-								<core:Item key="{path : 'ActivityTypeComboBox>ActivityType'}" text="{path : 'ActivityTypeComboBox>RoleName'}" />
-							</items>
-						</ComboBox>
-					</fb:control>	
-				</fb:FilterGroupItem>
-				<fb:FilterGroupItem groupName="filterGroup" name="Status" label="{i18n>detailViewTableFilterStatus}"  partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<ComboBox type="Text" items="">
-							<items>
-								<core:Item key="10" text="{i18n>StatusFromaterInProcess}"/>
-								<core:Item key="20" text="{i18n>StatusFromaterReleasedForApproval}"/>
-								<core:Item key="30" text="{i18n>StatusFromaterApproved}"/>
-								<core:Item key="40" text="{i18n>StatusFormatterApprovalRejected}"/>
-							</items>
-						</ComboBox>
-					</fb:control>	
-				</fb:FilterGroupItem>
-				<fb:FilterGroupItem groupName="filterGroup" name="Workpackage" label="{i18n>detailViewTableFilterWorkpackage}"  partOfCurrentVariant="true" visibleInFilterBar="true">
-					<fb:control>
-						<ComboBox type="Text" items="{path : 'PayloadWbsComboBox>/workpackageEntity'}">
-							<items>
-								<core:Item key="{path : 'PayloadWbsComboBox>WorkPackageID'}" text="{path : 'PayloadWbsComboBox>WorkPackageName'}" />
-							</items>
-						</ComboBox>
-					</fb:control>	
-				</fb:FilterGroupItem>
-			</fb:filterGroupItems>
-	    </fb:FilterBar>
-			<Table
-				id="lineItemsList"
-				modelContextChange=".onModelContextChange"
-				mode="MultiSelect"
-				busy="{detailView>/busyTable}"
-				busyIndicatorDelay="{detailView>/delayTable}"
-				selectAll = "false"
-				fixedLayout="false"
-				selectionChange="selectionChangeHandler"
-				items="{
-						path:'Payload>/EntitySet',
-						events:{dataReceived: '.onDataReceived'}}"
-				updateFinished=".onListUpdateFinished"
-				noDataText="{i18n>detailLineItemTableNoDataText}"
+			<l:VerticalLayout width="100%">
+				<fb:FilterBar
+					id="FBid"
+					search="onSearch"
+					showRestoreButton="true"
 				>
-				<headerToolbar>
-					<Toolbar>
-						<Title
-							id="lineItemsTitle"
-							text="{detailView>/lineItemListTitle}"
-							titleStyle="H3"
-							level="H3"/>
-					</Toolbar>
-				</headerToolbar>
-				<columns>
-				<Column vAlign="Top" width="25px" demandPopin="true" >
-						<Text text=""/>
-					</Column>
-					<Column vAlign="Top" width="100px" demandPopin="true">
-						<Text text="{i18n>detailViewTableColumnDate}"/>
-					</Column>
-					<Column demandPopin="true"  vAlign="Top" width="100px">
-						<Text text="{i18n>detailViewTableColumnEmployeeName}" />
-					</Column > 
-					<Column demandPopin="true" vAlign="Top"  width="100px" hAlign="Center" >
-						<Text text="{i18n>detailViewTableHours}"/>
-					</Column>
-					<Column vAlign="Top" demandPopin="true" hAlign="Center"   width="100px">
-						<Text text="{i18n>detailViewTableBillingControlCategory}" />
-					</Column>
-					<Column demandPopin="true" hAlign="Center"  vAlign="Top" width="75px">
-						<Text text="{i18n>detailViewTableStatus}" />
-					</Column>
-					<Column vAlign="Top" width="150px" demandPopin="true"> 
-						<Text text="{i18n>detailViewTableWorckpakage}"/>
-					</Column>
-					<Column vAlign="Top" width="150px" demandPopin="true"> 
-						<Text text="{i18n>detailViewTableWorkItem}"/>
-					</Column>
-					<Column demandPopin="true" vAlign="Top">
-						<Text text="{i18n>detailViewTableTimeSheetNote}"/>
-					</Column>
-					<Column demandPopin="true" vAlign="Top" >
-						<Label text="{i18n>EXTN}" required="true"/>
-					</Column>
-					<Column demandPopin="true" vAlign="Top" >
-						<Label text="{i18n>INTN}" required="true"/>
-					</Column>
-					<Column demandPopin="true"  vAlign="Top">
-						<Text text="{i18n>detailViewTableComboBoxNewProject}"/>
-					</Column >
-					<Column demandPopin="true" vAlign="Top">
-						<Text text="{i18n>detailViewTableComboBoxNewWorkpackage}"/>
-					</Column >
-					<Column demandPopin="true"  vAlign="Top">
-						<Text text="{i18n>detailViewTableProjectRole}" />
-					</Column>
-					<Column demandPopin="true"  vAlign="Top">
-						<Text text="{i18n>detailViewTablePurchaseOrder}" />
-					</Column>
-				</columns>
-				<items>
-					<ColumnListItem vAlign="Middle">
-						<cells>
-							<ObjectStatus width="50%"  icon="sap-icon://locked" visible="false" />
-							<ObjectIdentifier title="{path: 'Payload>TimeSheetDate' , formatter : '.formatter.dateFormatter'}" />
-								<Text  text="{path: 'Payload>EmployeeName' }" />
-								<Text  text="{path: 'Payload>TimeSheetDataFields/RecordedHours' }" />
-								<ObjectStatus width="50%"  icon="{path: 'Payload>TimeSheetDataFields/BillingControlCategory', formatter : '.formatter.billingTypeIconFormatter' }" tooltip="{path: 'Payload>TimeSheetDataFields/BillingControlCategory', formatter : '.formatter.billingTypeFormatter' }" />
-								<ObjectStatus width="50%"  icon="{path: 'Payload>TimeSheetStatus', formatter : '.formatter.StatusIconFormatter' }" tooltip="{path: 'Payload>TimeSheetStatus' , formatter : '.formatter.StatusFormatter' }" state="{path: 'Payload>TimeSheetStatus' , formatter : '.formatter.StatusStateFormatter' }" />
-								<Text  text="{path: 'Payload>WorkPackageName' }"  />
-								<Text  text="{path: 'Payload>TimeSheetDataFields/WorkItem' , formatter : '.formatter.workItemFormatter' }" />
-								<TextArea  value="{path: 'Payload>TimeSheetDataFields/TimeSheetNote' }"  enabled="false"  />
-								<TextArea  value="{path: 'Payload>YY1_ExtTicketNummer_TIM' }"  enabled="false"   />
-								<TextArea  value="{path: 'Payload>YY1_InterneTicketNr_TIM' }"  enabled="false"  />
-								<custom:FeedComboBox	
-										enabled="false"
-										id="comboBoxProjectID"
-										width="100%"
-										filterSecondaryValues= "true"
-										showSecondaryValues= "true"
-										selectedKey = "{path: 'Payload>ProjectID' }" 
-										change = "onListSelectProjectIDChange"
-										items="{
-											path: 'PayloadComboBox>/ProjectSet',
-											sorter: {
-												path: 'ProjectID',
-												descending: false
+					<fb:filterGroupItems>
+						<fb:FilterGroupItem
+							groupName="filterGroup"
+							mandatory="true"
+							name="From"
+							label="{i18n>detailViewFilterFrom}"
+							visibleInFilterBar="true"
+						>
+							<fb:control>
+								<DatePicker
+									displayFormat="dd.MM.yyyy"
+									id="FBfrom"
+									dateValue="{MasterModel>/Filters/DateFrom}"
+								/>
+							</fb:control>
+						</fb:FilterGroupItem>
+						<fb:FilterGroupItem
+							groupName="filterGroup"
+							name="To"
+							mandatory="true"
+							label="{i18n>detailViewTableFilterTo}"
+							visibleInFilterBar="true"
+						>
+							<fb:control>
+								<DatePicker
+									displayFormat="dd.MM.yyyy"
+									dateValue="{MasterModel>/Filters/DateTo}"
+								/>
+							</fb:control>
+						</fb:FilterGroupItem>
+						<fb:FilterGroupItem
+							groupName="filterGroup"
+							name="Employee"
+							mandatory="true"
+							label="{i18n>detailViewTableFilterEmployee}"
+							visibleInFilterBar="true"
+						>
+							<fb:control>
+								<Input
+									type="Text"
+									value="{MasterModel>/Filters/Employee}"
+								/>
+							</fb:control>
+						</fb:FilterGroupItem>
+						<fb:FilterGroupItem
+							groupName="filterGroup"
+							name="Billing Type"
+							label="{i18n>detailViewTableFilterBillingType}"
+							visibleInFilterBar="true"
+						>
+							<fb:control>
+								<ComboBox selectedKey="{MasterModel>/Filters/BillingType}">
+									<items>
+										<core:Item
+											key=""
+											text="Billable"
+										/>
+										<core:Item
+											key="NON_BILL"
+											text="Non Billable"
+										/>
+									</items>
+								</ComboBox>
+							</fb:control>
+						</fb:FilterGroupItem>
+						<fb:FilterGroupItem
+							groupName="filterGroup"
+							name="Role"
+							label="{i18n>detailViewTableFilterRole}"
+							visibleInFilterBar="true"
+						>
+							<fb:control>
+								<ComboBox
+									items="{
+										path: 'ActivityTypeComboBox>/ActivitySet'
+									}"
+									selectedKey="{MasterModel>/Filters/Role}"
+								>
+									<items>
+										<core:Item
+											key="{
+												path: 'ActivityTypeComboBox>ActivityType'
+											}"
+											text="{
+												path: 'ActivityTypeComboBox>RoleName'
+											}"
+										/>
+									</items>
+								</ComboBox>
+							</fb:control>
+						</fb:FilterGroupItem>
+						<fb:FilterGroupItem
+							groupName="filterGroup"
+							name="Status"
+							label="{i18n>detailViewTableFilterStatus}"
+							visibleInFilterBar="true"
+						>
+							<fb:control>
+								<ComboBox
+									items=""
+									selectedKey="{MasterModel>/Filters/Status}"
+								>
+									<items>
+										<core:Item
+											key="10"
+											text="{i18n>StatusFromaterInProcess}"
+										/>
+										<core:Item
+											key="20"
+											text="{i18n>StatusFromaterReleasedForApproval}"
+										/>
+										<core:Item
+											key="30"
+											text="{i18n>StatusFromaterApproved}"
+										/>
+										<core:Item
+											key="40"
+											text="{i18n>StatusFormatterApprovalRejected}"
+										/>
+									</items>
+								</ComboBox>
+							</fb:control>
+						</fb:FilterGroupItem>
+						<fb:FilterGroupItem
+							groupName="filterGroup"
+							name="Workpackage"
+							label="{i18n>detailViewTableFilterWorkpackage}"
+							visibleInFilterBar="true"
+						>
+							<fb:control>
+								<ComboBox
+									selectedKey="{MasterModel>/Filters/WorkPackage}"
+									items="{
+										path: 'workpackageJSONModel>/workpackageEntity'
+									}"
+								>
+									<items>
+										<core:Item
+											key="{
+												path: 'workpackageJSONModel>WorkPackageID'
+											}"
+											text="{
+												path: 'workpackageJSONModel>WorkPackageName'
+											}"
+										/>
+									</items>
+								</ComboBox>
+							</fb:control>
+						</fb:FilterGroupItem>
+					</fb:filterGroupItems>
+				</fb:FilterBar>
+				<Table
+					id="lineItemsList"
+					mode="MultiSelect"
+					busy="{detailView>/busyTable}"
+					busyIndicatorDelay="{detailView>/delayTable}"
+					fixedLayout="false"
+					selectionChange="selectionChangeHandler"
+					items="{
+						path: 'TimeSheetData>/'
+					}"
+					width="auto"
+					updateFinished=".onListUpdateFinished"
+					noDataText="{i18n>detailLineItemTableNoDataText}"
+				>
+					<headerToolbar>
+						<Toolbar>
+							<Title
+								id="lineItemsTitle"
+								text="{detailView>/lineItemListTitle}"
+								titleStyle="H3"
+								level="H3"
+							/>
+						</Toolbar>
+					</headerToolbar>
+					<columns>
+						<Column
+							vAlign="Top"
+							width="1%"
+							demandPopin="true"
+						>
+							<Text text=""/>
+						</Column>
+						<Column
+							vAlign="Top"
+							width="8%"
+							demandPopin="true"
+						>
+							<Text text="{i18n>detailViewTableColumnDate}"/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="5%"
+						>
+							<Text text="{i18n>detailViewTableColumnEmployeeName}"/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="5%"
+							hAlign="Center"
+						>
+							<Text text="{i18n>detailViewTableHours}"/>
+						</Column>
+						<Column
+							vAlign="Top"
+							demandPopin="true"
+							hAlign="Center"
+							width="5%"
+						>
+							<Text text="{i18n>detailViewTableBillingControlCategory}"/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="3%"
+							minScreenWidth="Small"
+						>
+							<Text text="{i18n>detailViewTableStatus}"/>
+						</Column>
+						<Column
+							vAlign="Top"
+							width="5%"
+							demandPopin="true"
+						>
+							<Text text="{i18n>detailViewTableWorckpakage}"/>
+						</Column>
+						<Column
+							vAlign="Top"
+							width="7%"
+							demandPopin="true"
+						>
+							<Text text="{i18n>detailViewTableWorkItem}"/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="6%"
+						>
+							<Text text="{i18n>detailViewTableTimeSheetNote}"/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="8%"
+						>
+							<Label
+								text="{i18n>EXTN}"
+								required="true"
+							/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="8%"
+						>
+							<Label
+								text="{i18n>INTN}"
+								required="true"
+							/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="10%"
+						>
+							<Text text="{i18n>detailViewTableComboBoxNewProject}"/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="11%"
+						>
+							<Text text="{i18n>detailViewTableComboBoxNewWorkpackage}"/>
+						</Column>
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="10%"
+						>
+							<Text text="{i18n>detailViewTableProjectRole}"/>
+						</Column>
+						<!-- <Column
+							demandPopin="true"
+							vAlign="Top"
+						>
+							<Text text="{i18n>detailViewTablePurchaseOrder}"/>
+						</Column> -->
+						<Column
+							demandPopin="true"
+							vAlign="Top"
+							width="8%"
+						>
+							<Label text="{i18n>CostCenter}"/>
+						</Column>
+					</columns>
+					<items>
+						<ColumnListItem vAlign="Middle">
+							<cells>
+								<ObjectStatus
+									icon="sap-icon://locked"
+									visible="false"
+								/>
+								<ObjectIdentifier title="{
+									path: 'TimeSheetData>TimeSheetDate',
+									formatter: '.formatter.dateFormatter'
+								}"/>
+								<Text text="{
+									path: 'TimeSheetData>EmployeeName'
+								}"/>
+								<Text text="{
+									path: 'TimeSheetData>TimeSheetDataFields/RecordedHours'
+								}"/>
+								<ObjectStatus
+									icon="{
+										path: 'TimeSheetData>TimeSheetDataFields/BillingControlCategory',
+										formatter: '.formatter.billingTypeIconFormatter'
+									}"
+									tooltip="{
+										path: 'TimeSheetData>TimeSheetDataFields/BillingControlCategory',
+										formatter: '.formatter.billingTypeFormatter'
+									}"
+								/>
+								<ObjectStatus
+									icon="{
+										path: 'TimeSheetData>TimeSheetStatus',
+										formatter: '.formatter.StatusIconFormatter'
+									}"
+									tooltip="{
+										path: 'TimeSheetData>TimeSheetStatus',
+										formatter: '.formatter.StatusFormatter'
+									}"
+									state="{
+										path: 'TimeSheetData>TimeSheetStatus',
+										formatter: '.formatter.StatusStateFormatter'
+									}"
+								/>
+								<Text text="{
+									path: 'TimeSheetData>WorkPackageName'
+								}"/>
+								<Text text="{
+									path: 'TimeSheetData>TimeSheetDataFields/WorkItem',
+									formatter: '.formatter.workItemFormatter'
+								}"/>
+								<TextArea
+									width="75%"
+									id="noteInput"
+									value="{
+										path: 'TimeSheetData>TimeSheetDataFields/TimeSheetNote'
+									}"
+									enabled="false"
+								/>
+								<Input
+									width="75%"
+									id="externalTicketInput"
+									value="{
+										path: 'TimeSheetData>YY1_ExtTicketNummer_TIM'
+									}"
+									enabled="false"
+								/>
+								<Input
+									width="75%"
+									id="internalTicketInput"
+									value="{
+										path: 'TimeSheetData>YY1_InterneTicketNr_TIM'
+									}"
+									enabled="false"
+								/>
+								<custom:FeedComboBox
+									enabled="false"
+									id="comboBoxProjectID"
+									filterSecondaryValues="true"
+									showSecondaryValues="true"
+									selectedKey="{
+										path: 'TimeSheetData>ProjectID'
+									}"
+									change="onListSelectProjectIDChange"
+									items="{
+										path: 'PayloadComboBox>/ProjectSet',
+										templateShareable: false,
+										sorter: {
+											path: 'ProjectID',
+											descending: false
 										}
-											}">
-										<core:ListItem key="{PayloadComboBox>ProjectID}" text="{PayloadComboBox>ProjectID}"  additionalText="{PayloadComboBox>ProjectName}"/>
+									}"
+								>
+									<core:ListItem
+										key="{PayloadComboBox>ProjectID}"
+										text="{PayloadComboBox>ProjectID}"
+										additionalText="{PayloadComboBox>ProjectName}"
+									/>
 								</custom:FeedComboBox>
 								<custom:FeedComboBox
-										enabled="false"
-										id="comboBoxWorkPackageID"
-										filterSecondaryValues= "true"
-										width="100%"
-										showSecondaryValues= "true"
-										change = "onListSelectWorkpackageChange"
-										app:ProjectID="{Payload>ProjectID}"
-										items="{
-											path: '/WorkpackageSet'
-											}">
-										<core:ListItem key="{WorkPackageID}" text="{WorkPackageID}"  additionalText="{WorkPackageName}"/>
+									enabled="false"
+									id="comboBoxWorkPackageID"
+									filterSecondaryValues="true"
+									showSecondaryValues="true"
+									change="onListSelectWorkpackageChange"
+									app:ProjectID="{TimeSheetData>ProjectID}"
+									items="{
+										path: '/WorkpackageSet',
+										templateShareable: false
+									}"
+								>
+									<core:ListItem
+										key="{WorkPackageID}"
+										text="{WorkPackageID}"
+										additionalText="{WorkPackageName}"
+									/>
 								</custom:FeedComboBox>
-								<custom:FeedComboBox	
-										enabled="false"
-										id="comboBoxActivityType"
-										width="100%"
-										filterSecondaryValues= "true"
-										showSecondaryValues= "true"
-										value = "{path: 'Payload>TimeSheetDataFields/ActivityType' , formatter: '.formatter.activityTypeFormatter' }"
-										 	items="{
-											path: 'PayloadComboBoxRoles>/mRolesEntity',
-											filters: [{
-												path: 'ResType',
-      											operator: 'EQ',
-            									value1: '0ACT' 
-												}]
-											}">
-										<core:ListItem key="{PayloadComboBoxRoles>ResourceId}" text="{path: 'PayloadComboBoxRoles>ResourceId',formatter: '.formatter.activityTypeFormatter'}" 
-														additionalText="{PayloadComboBoxRoles>BillingControlCategoryID}{path: 'PayloadComboBoxRoles>DelvryServOrgT',formatter: '.formatter.addCommaFirst'}{path : 'PayloadComboBoxRoles>WorkitemName',formatter: '.formatter.addCommaSecond'}"/>
+								<custom:FeedComboBox
+									enabled="false"
+									id="comboBoxActivityType"
+									filterSecondaryValues="true"
+									showSecondaryValues="true"
+									value="{
+										path: 'TimeSheetData>TimeSheetDataFields/ActivityType',
+										formatter: '.formatter.activityTypeFormatter'
+									}"
+									items="{
+										path: 'PayloadComboBoxRoles>/mRolesEntity',
+										templateShareable: false,
+										filters: [{
+											path: 'ResType',
+											operator: 'EQ',
+											value1: '0ACT'
+										}]
+									}"
+								>
+									<core:ListItem
+										key="{PayloadComboBoxRoles>ResourceId}"
+										text="{
+											path: 'PayloadComboBoxRoles>ResourceId',
+											formatter: '.formatter.activityTypeFormatter'
+										}"
+										additionalText="{PayloadComboBoxRoles>BillingControlCategoryID}{
+											path: 'PayloadComboBoxRoles>DelvryServOrgT',
+											formatter: '.formatter.addCommaFirst'
+										}{
+											path: 'PayloadComboBoxRoles>WorkitemName',
+											formatter: '.formatter.addCommaSecond'
+										}"
+									/>
 								</custom:FeedComboBox>
-								<custom:FeedComboBox	
-										enabled="false"
-										id="comboBoxPurchaseOrder"
-										width="100%"
-										visible="{= ${Payload>TimeSheetDataFields/PurchaseOrderItem} !== '0' }"
-										filterSecondaryValues= "true"
-										showSecondaryValues= "true"
-										value = "{path: 'Payload>TimeSheetDataFields/PurchaseOrder'}"
-										change = "onListSelectPurchaseOrderChange"
-										items="{
-											path: 'PayloadPurchaseOrder>/PoSet'
-											}">
-										<core:ListItem key="{PayloadPurchaseOrder>PurchaseOrder}" text="{PayloadPurchaseOrder>PurchaseOrder}"  additionalText="{PayloadPurchaseOrder>PurchaseOrderItem}"/>
-								</custom:FeedComboBox>		
-						</cells>
-					</ColumnListItem>
-				</items>
-			</Table>
+								<!-- <custom:FeedComboBox
+									enabled="false"
+									id="comboBoxPurchaseOrder"
+									width="100%"
+									visible="{= ${TimeSheetData>TimeSheetDataFields/PurchaseOrderItem} !== '0' }"
+									filterSecondaryValues="true"
+									showSecondaryValues="true"
+									value="{
+										path: 'TimeSheetData>TimeSheetDataFields/PurchaseOrder'
+									}"
+									items="{
+										path: 'PayloadPurchaseOrder>/PoSet'
+									}"
+								>
+									<core:ListItem
+										key="{PayloadPurchaseOrder>PurchaseOrder}"
+										text="{PayloadPurchaseOrder>PurchaseOrder}"
+										additionalText="{PayloadPurchaseOrder>PurchaseOrderItem}"
+									/>
+							</custom:FeedComboBox> -->
+								<Input
+									width="75%"
+									id="costCenterInput"
+									value="{
+										path: 'TimeSheetData>YY1_ExtKostenstelle_TIM'
+									}"
+									enabled="false"
+								/>
+							</cells>
+						</ColumnListItem>
+					</items>
+				</Table>
 			</l:VerticalLayout>
 		</semantic:content>
 		<semantic:closeAction>
 			<semantic:CloseAction
-					id="closeColumn"
-					press=".onCloseDetailPress"/>
+				id="closeColumn"
+				press=".onCloseDetailPress"
+			/>
 		</semantic:closeAction>
-
 		<semantic:fullScreenAction>
 			<semantic:FullScreenAction
-					id="enterFullScreen"
-					visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
-					press=".toggleFullScreen"/>
+				id="enterFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; !${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+				press=".toggleFullScreen"
+			/>
 		</semantic:fullScreenAction>
 		<semantic:exitFullScreenAction>
 			<semantic:ExitFullScreenAction
-					id="exitFullScreen"
-					visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
-					press=".toggleFullScreen"/>
+				id="exitFullScreen"
+				visible="{= !${device>/system/phone} &amp;&amp; ${appView>/actionButtonsInfo/midColumn/fullScreen}}"
+				press=".toggleFullScreen"
+			/>
 		</semantic:exitFullScreenAction>
-
 		<semantic:footerCustomActions>
-			<Button text="{i18n>detailViewSaveButton}"  press="onSave" id="saveButtonID" enabled="false"/>
+			<Button
+				text="{i18n>detailViewSaveButton}"
+				press="onSave"
+				id="saveButtonID"
+				enabled="false"
+			/>
 		</semantic:footerCustomActions>
-			
 	</semantic:SemanticPage>
-
 </mvc:View>

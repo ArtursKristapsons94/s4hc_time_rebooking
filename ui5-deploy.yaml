@@ -1,0 +1,23 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: '2.4'
+metadata:
+  name: 'timereporting'
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          destination: S4HC_SAML_ASSERTION
+          url: https://my312750-api.s4hana.ondemand.com
+        app:
+          name: YY1_TIMEREPORT
+          description: time rebooking app
+          package: TEST_YY1_DEFAULT
+          transport: ""

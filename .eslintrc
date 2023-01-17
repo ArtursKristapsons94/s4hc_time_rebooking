@@ -1,6 +1,7 @@
 {
 	"env": {
-		"browser": true
+		"browser": true,
+		"ecmaVersion": "ES2022"
 	},
 	"globals": {
 		"sap": true,
@@ -15,6 +16,7 @@
 		"no-constant-condition": 2,
 		"no-control-regex": 2,
 		"no-debugger": 2,
+		"max-classes-per-file": ["error", 8],
 		"no-dupe-args": 2,
 		"no-dupe-keys": 2,
 		"no-duplicate-case": 2,
@@ -114,7 +116,7 @@
         }],
 		"complexity": ["error", 10],
         "max-len": ["error", {
-            "code": 120,
+            "code": 200,
             "ignoreComments": true,
             "tabWidth": 1,
             "ignoreStrings": true

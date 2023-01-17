@@ -3,16 +3,9 @@
 	"sap.app": {
 		"id": "com.timereporting",
 		"type": "application",
-		"i18n": {
-			"bundleUrl": "i18n/i18n.properties",
-			"supportedLocales": [
-				"",
-				"de"
-			],
-			"fallbackLocale": ""
-		},
-		"title": "Time Rebooking Application",
-		"description": "{{appDescription}}",
+		"i18n": "i18n/i18n.properties",
+		"title": "{{appTitle}}",
+        "description": "{{appDescription}}",
 		"applicationVersion": {
 			"version": "1.0.0"
 		},
@@ -40,17 +33,6 @@
 					"odataVersion": "2.0"
 				}
 			},
-			"POService": {
-				"uri": "/sap/opu/odata/sap/API_PURCHASEORDER_PROCESS_SRV/",
-				"type": "OData",
-				"settings": {
-					"odataVersion": "2.0"
-				}
-			},
-			"Payload": {
-				"uri": "model/Payload.json",
-				"type": "JSON"
-			},
 			"PayloadComboBox": {
 				"uri": "model/PayloadComboBox.json",
 				"type": "JSON"
@@ -66,14 +48,26 @@
 			"PayloadComboBoxRoles": {
 				"uri": "model/PayloadComboBoxRoles.json",
 				"type": "JSON"
-			},
-			"PayloadWbsComboBox": {
-				"uri": "model/PayloadWbsComboBox.json",
-				"type": "JSON"
 			}
-		}
+		},
+		"crossNavigation": {
+            "inbounds": {
+                "com-timereporting-inbound": {
+                    "signature": {
+                        "parameters": {},
+                        "additionalParameters": "allowed"
+                    },
+                    "semanticObject": "TimeRebooking",
+                    "action": "Edit",
+                    "title": "{{appTitle}}",
+                    "subTitle": "{{appDescription}}",
+                    "icon": ""
+                }
+            }
+        }
 	},
 	"sap.ui": {
+		"fullWidth": true,
 		"technology": "UI5",
 		"icons": {
 			"icon": "sap-icon://detail-view",
@@ -114,16 +108,12 @@
 			"i18n": {
 				"type": "sap.ui.model.resource.ResourceModel",
 				"settings": {
-					"bundleUrl": "i18n/i18n.properties",
-					"supportedLocales": [
-						"",
-						"de"
-					],
-					"fallbackLocale": ""
+					"bundleName": "com.timereporting.i18n.i18n"
 				}
 			},
 			"": {
 				"dataSource": "mainService",
+				"type": "sap.ui.model.odata.v2.ODataModel",
 				"preload": true,
 				"settings": {
 					"defaultCountMode": "None",
@@ -132,14 +122,7 @@
 			},
 			"TimeSheetModel": {
 				"dataSource": "TimeSheetService",
-				"settings": {
-					"defaultOperationMode": "Server",
-					"defaultBindingMode": "OneWay",
-					"defaultCountMode": "None"
-				}
-			},
-			"POService": {
-				"dataSource": "POService",
+				"type": "sap.ui.model.odata.v2.ODataModel",
 				"settings": {
 					"defaultOperationMode": "Server",
 					"defaultBindingMode": "OneWay",
@@ -148,18 +131,14 @@
 			},
 			"PWAModel": {
 				"dataSource": "PWAService",
+				"type": "sap.ui.model.odata.v2.ODataModel",
+				"preload": true,
 				"settings": {
-					"defaultOperationMode": "Server",
-					"defaultBindingMode": "OneWay",
 					"defaultCountMode": "None"
 				}
 			},
-			"Payload": {
-				"dataSource": "Payload",
-				"type": "sap.ui.model.json.JSONModel",
-				"settings": {
-					"defaultCountMode": "None"
-				}
+			"TimeSheetData": {
+				"type": "sap.ui.model.json.JSONModel"
 				
 			},
 			"PayloadComboBox": {
@@ -190,12 +169,11 @@
 					"defaultCountMode": "None"
 				}
 			},
-			"PayloadWbsComboBox": {
-				"dataSource": "PayloadWbsComboBox",
-				"type": "sap.ui.model.json.JSONModel",
-				"settings": {
-					"defaultCountMode": "None"
-				}
+			"workpackageJSONModel": {
+				"type": "sap.ui.model.json.JSONModel"
+			},
+			"MasterModel" : {
+				"type": "com.timereporting.model.master.MasterModel"
 			}
 		},
 		"routing": {
@@ -235,11 +213,6 @@
 					"viewName": "Detail",
 					"viewId": "detail",
 					"viewLevel": 1,
-					"controlAggregation": "midColumnPages"
-				},
-				"detailObjectNotFound": {
-					"viewName": "DetailObjectNotFound",
-					"viewId": "detailObjectNotFound",
 					"controlAggregation": "midColumnPages"
 				},
 				"notFound": {

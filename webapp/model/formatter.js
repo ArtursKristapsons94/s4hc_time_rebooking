@@ -29,7 +29,7 @@ sap.ui.define([
 			var a = 1;
 		},
 		dateFormatter:function(sValue) {
-			var dateFormat = sap.ui.core.format.DateFormat.getDateInstance({pattern : "dd.MM.yyyy " });   
+			var dateFormat = sap.ui.core.format.DateFormat.getDateInstance({pattern : "dd.MM.yyyy" });   
 			return  dateFormat.format(sValue);
 		},
 		billingTypeFormatter:function(sValue) {
